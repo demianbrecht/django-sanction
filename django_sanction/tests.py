@@ -19,19 +19,44 @@ settings.configure(
         'django.contrib.sites',
         'django.contrib.messages',
         'django.contrib.staticfiles', 
-    )
+    ),
+    MIDDLEWARE_CLASSES = (
+        "django_sanction.middleware.AuthMiddleware",
+    ),
+    ROOT_URLCONF = "django_sanction.tests",
+    SANCTION_GOOGLE_CLIENT_ID = "google_id",
+    SANCTION_GOOGLE_CLIENT_SECRET = "google_secret",
+    SANCTION_FACEBOOK_CLIENT_ID = "facebook_id",
+    SANCTION_FACEBOOK_CLIENT_SECRET = "facebook_secret",
+    SANCTION_FACEBOOK_SCOPE = ("test_scope",),
+    SANCTION_PROVIDERS = ( 
+        "django_sanction.providers.Google",
+        "django_sanction.providers.Facebook",
+    ),
 )
 
+from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.http import HttpRequest
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+)
 from django.db import models
 from django.test import TestCase
 from django.test.client import Client
+from django.views.generic import TemplateView
 
 from django_sanction.backends import AuthenticationBackend
-from django_sanction.providers import Google
+from django_sanction.providers import Provider 
+from django_sanction import urls
+
+
+urlpatterns = patterns("",
+    url(r"^$", lambda r: HttpResponse("test"), name="index"),
+    url(r"^o/", include(urls)), 
+)
 
 
 class CustomUser(object):
@@ -105,15 +130,21 @@ class TestBackend(TestCase):
         self.assertEquals(be.get_user(self.cur_user.id), self.cur_user)
 
 
-    def test_login(self):
+    def test_auth_request(self):
+        self.__init_settings()
         c = Client()
-        r = HttpRequest()
-        r.session = {}
-        self.assertIsNone(authenticate(request=r, provider=Google))
+        for p in Provider.__subclasses__():
+            name = p.__name__.lower()
+            self.assertEquals(c.get("/o/auth/%s" % name).status_code, 302)
 
-        r.session["s_user"] = "1"
-        r.session["s_expires"] = 0
-        self.assertIsNone(authenticate(request=r, provider=Google))
+
+    def test_code_request(self):
+        self.__init_settings()
+        c = Client()
+        for p in Provider.__subclasses__():
+            name = p.__name__.lower()
+            # TODO: Figure out how to test this
+            #self.assertEquals(c.get("/o/code/%s" % name).status_code, 302)
 
 
     def __init_settings(self):

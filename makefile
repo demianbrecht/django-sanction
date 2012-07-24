@@ -1,5 +1,5 @@
 .PHONY: test
 
 test:
-	nosetests -s --with-coverage --cover-package=django_sanction
+	nosetests -s --pdb --with-coverage --cover-package=django_sanction
 

@@ -2,6 +2,7 @@
 import inspect
 
 from django.conf import settings
+from util import get_def
 
 
 _SESSION_USER_ID_KEY = "user_id"
@@ -26,17 +27,12 @@ class AuthenticationBackend(object):
         return self.__get_user_class()
 
     
-    def authenticate(self, request=None, provider=None, grant_type=None):
-        if grant_type is None: grant_type = GRANT_TYPE_AUTHORIZATION_CODE
-        assert(request is not None)
-        assert(provider is not None)
-
-        if request and request.session.has_key("s_user") and \
-            request.session.has_key("s_expires"):
-            return self.__get_user_lookup_fn()(provider,
-                request["s_user"])
-
-        return None
+    def authenticate(self, request=None):
+        """ The user should be redirected to [prefix]/auth/[provider] rather 
+        than explicitly calling authenticate
+        """
+        raise NotImplementedError(
+            "authenticate should not be used with the sanction backend")
 
 
     def get_user(self, user_id):
@@ -45,7 +41,7 @@ class AuthenticationBackend(object):
     
     def __get_user_lookup_fn(self):
         fn_name = getattr(settings, _AUTH_USER_LOOKUP_FN_KEY)
-        f = self.__get_def(fn_name)
+        f = get_def(fn_name)
 
         assert(callable(f))
         return f
@@ -54,26 +50,10 @@ class AuthenticationBackend(object):
     def __get_user_class(self):
         mod_name = getattr(settings, _AUTH_USER_CLASS_KEY,
             "django.contrib.auth.models.User")
-        c = self.__get_def(mod_name)
+        c = get_def(mod_name)
 
         assert(inspect.isclass(c))
         return c
 
 
-    def __get_def(self, name):
-        p = name.split(".")
-        
-        m = None
-        for n in range(-1, -len(p), -1):
-            mod = ".".join(p[:n])
-            try:
-                m = __import__(mod)
-                if m is not None:
-                    break
-            except: pass
-        assert(m is not None)
-
-        for c in p[1:]:
-            m = getattr(m, c)
-        return m
 
