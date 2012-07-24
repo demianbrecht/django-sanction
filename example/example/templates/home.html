@@ -1,3 +1,4 @@
+{% load reversetag %}
 {% for p in providers %}
-{% url sanction-google %} | {{ p.name }}
+<a href="{% reverse p.auth_view_name %}">{{ p.name }}</a>
 {% endfor %}

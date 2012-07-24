@@ -7,6 +7,7 @@ README = open(os.path.join(here, "README.rst")).read()
 requires = [
 	"django",
 	"sanction",
+	"reversetag",
 ]
 
 setup(

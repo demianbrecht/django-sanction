@@ -18,9 +18,11 @@ def append_auth_uri(provider, client):
         "redirect_uri"] = provider.redirect_uri
 
     global urlpatterns
+    name = provider.name.lower()
     urlpatterns += patterns("",
-        url(r"^auth/%s" % provider.__class__.__name__.lower(),
-            lambda r: redirect(client.auth_uri(**kwargs))))
+        url(r"^auth/%s" % name,
+            lambda r: redirect(client.auth_uri(**kwargs)),
+            name=provider.auth_view_name))
 
 
 def auth_login(request=None):
@@ -30,8 +32,9 @@ def auth_login(request=None):
 
 def append_code_uri(provider, client):
     global urlpatterns
+    name = provider.name.lower()
     urlpatterns += patterns("",
-        url(r"^code/%s" % provider.__class__.__name__.lower(), auth_login))
+        url(r"^code/%s" % name, auth_login, name=provider.code_view_name))
     
 
 for provider in getattr(settings, "SANCTION_PROVIDERS"):

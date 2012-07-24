@@ -7,8 +7,11 @@ TEMPLATE_DEBUG = DEBUG
 
 SANCTION_GOOGLE_CLIENT_ID = "google_id"
 SANCTION_GOOGLE_CLIENT_SECRET = "google_secret"
+SANCTION_FACEBOOK_CLIENT_ID = "facebook_id"
+SANCTION_FACEBOOK_CLIENT_SECRET = "facebook_secret"
 SANCTION_PROVIDERS = (
     "django_sanction.providers.Google",
+    "django_sanction.providers.Facebook",
 )
 
 ADMINS = (
@@ -131,6 +134,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    "reversetag",
     "django_sanction",
 )
 

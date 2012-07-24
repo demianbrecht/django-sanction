@@ -14,7 +14,9 @@ class Provider(object):
             None)
 
         self.name = self.__class__.__name__
-        self.view_name = "sanction-%s" % self.name.lower()
+        view_name = self.name.lower()
+        self.auth_view_name = "sanction-%s-auth" % view_name 
+        self.code_view_name = "sanction-%s-code" % view_name 
 
 
 class Google(Provider):
