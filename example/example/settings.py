@@ -1,7 +1,15 @@
+# vim: ts=4 sw=4 et:
 # Django settings for example project.
+from os.path import dirname
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+SANCTION_GOOGLE_CLIENT_ID = "google_id"
+SANCTION_GOOGLE_CLIENT_SECRET = "google_secret"
+SANCTION_PROVIDERS = (
+    "django_sanction.providers.Google",
+)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -109,6 +117,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+	"%s/templates" % dirname(__file__),
 )
 
 INSTALLED_APPS = (
@@ -122,6 +131,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    "django_sanction",
 )
 
 # A sample logging configuration. The only tangible logging

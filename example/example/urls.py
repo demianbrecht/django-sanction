@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+import django_sanction.urls
+from views import Home 
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -14,4 +16,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
+	url(r"^o/", include(django_sanction.urls)),
+	url(r"^$", Home.as_view()),
 )
