@@ -1,13 +1,17 @@
 # vim: ts=4 sw=4 et:
+from urlparse import parse_qsl
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+_urlparser = lambda data: dict(parse_qsl(data)) 
 
 class Provider(object):
     def __init__(self):
         name = self.__class__.__name__.upper()
         self.client_id = getattr(settings, "SANCTION_%s_CLIENT_ID" % name)
-        self.secret_key = getattr(settings, "SANCTION_%s_CLIENT_SECRET" % name)
+        self.client_secret = getattr(settings, "SANCTION_%s_CLIENT_SECRET" % 
+            name)
         self.scope = getattr(settings, "SANCTION_%s_SCOPE" % name, None)
         self.state = getattr(settings, "SANCTION_STATE", None)
         self.redirect_uri = getattr(settings, "SANCTION_%s_REDIRECT" % name,
@@ -33,4 +37,5 @@ class Facebook(Provider):
         self.auth_endpoint="https://www.facebook.com/dialog/oauth"
         self.token_endpoint="https://graph.facebook.com/oauth/access_token"
         self.resource_endpoint="https://graph.facebook.com"
+        self.parser = _urlparser
 

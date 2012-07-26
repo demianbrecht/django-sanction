@@ -5,14 +5,23 @@ from os.path import dirname
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-SANCTION_GOOGLE_CLIENT_ID = "google_id"
-SANCTION_GOOGLE_CLIENT_SECRET = "google_secret"
-SANCTION_FACEBOOK_CLIENT_ID = "facebook_id"
-SANCTION_FACEBOOK_CLIENT_SECRET = "facebook_secret"
+SANCTION_GOOGLE_CLIENT_ID = "421833888173.apps.googleusercontent.com"
+SANCTION_GOOGLE_CLIENT_SECRET = "VueqKFZyz-aoL4rQFleEIT1j"
+SANCTION_GOOGLE_SCOPE = ("email",)
+SANCTION_FACEBOOK_CLIENT_ID = "152107704926343"
+SANCTION_FACEBOOK_CLIENT_SECRET = "80c81e4d7d5bc68ecc8cf1da0213382e"
+SANCTION_FACEBOOK_SCOPE = ("email",)
 SANCTION_PROVIDERS = (
     "django_sanction.providers.Google",
     "django_sanction.providers.Facebook",
 )
+SANCTION_GET_USER_FN = "example.auth.get_user"
+SANCTION_AUTH_FN = "example.auth.authenticate"
+
+AUTHENTICATION_BACKENDS = (
+    "django_sanction.backends.AuthenticationBackend",
+)
+
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -22,8 +31,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'sql.db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.

@@ -1,4 +1,4 @@
 {% load reversetag %}
 {% for p in providers %}
-<a href="{% url p.auth_view_name %}">{{ p.name }}</a>
+<a href="{% reverse p.auth_view_name %}">{{ p.name }}</a>
 {% endfor %}
