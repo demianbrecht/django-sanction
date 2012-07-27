@@ -13,3 +13,5 @@ Required
 * Custom login handling (auth_login in views.py)
 * Custom error handling (i.e. redirect to login page vs 403)
 * 100% unit test coverage
+* Default CSRF protection
+
