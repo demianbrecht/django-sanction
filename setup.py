@@ -11,7 +11,7 @@ requires = [
 ]
 
 setup(
-	name="django_sanction_auth",
+	name="django_sanction",
 	keywords="python,oauth2,sanction,django",
 	version="0.1.0",
 	description="A Django front end for the sanction OAuth2 client library",
