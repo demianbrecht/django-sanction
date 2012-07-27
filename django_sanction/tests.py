@@ -1,157 +1,173 @@
 # vim: ts=4 sw=4 et:
-from django.conf import settings
-settings.configure(
-    SECRET_KEY = "UNIT_TEST",
-    DATABASES = { 
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',                      
+
+if __name__=="__main__":
+    from BaseHTTPServer import (
+        BaseHTTPRequestHandler,
+        HTTPServer,
+    )
+    from json import dumps
+    from urlparse import (
+        parse_qsl,
+        urlparse
+    )
+
+    class Handler(BaseHTTPRequestHandler):
+        route_handlers = {
+            "/oauth/dialog": "handle_dialog",
+            "/oauth/token": "handle_token",
+            "/oauth/api": "handle_api",
         }
-    },
-    AUTHENTICATION_BACKENDS = (
-        "django_sanction.backends.AuthenticationBackend",
-    ),
-    AUTH_PROFILE_MODULE = "django_sanction.tests.UserProfile",
-    INSTALLED_APPS = (
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.sites',
-        'django.contrib.messages',
-        'django.contrib.staticfiles', 
-    ),
-    MIDDLEWARE_CLASSES = (
-        "django_sanction.middleware.AuthMiddleware",
-    ),
-    ROOT_URLCONF = "django_sanction.tests",
-    SANCTION_GOOGLE_CLIENT_ID = "google_id",
-    SANCTION_GOOGLE_CLIENT_SECRET = "google_secret",
-    SANCTION_FACEBOOK_CLIENT_ID = "facebook_id",
-    SANCTION_FACEBOOK_CLIENT_SECRET = "facebook_secret",
-    SANCTION_FACEBOOK_SCOPE = ("test_scope",),
-    SANCTION_PROVIDERS = ( 
-        "django_sanction.providers.Google",
-        "django_sanction.providers.Facebook",
-    ),
-)
 
-from django.conf.urls.defaults import patterns, include, url
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.core.management import call_command
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-)
-from django.db import models
-from django.test import TestCase
-from django.test.client import Client
-from django.views.generic import TemplateView
+        def do_POST(self):
+            self.do_GET()
 
-from django_sanction.backends import AuthenticationBackend
-from django_sanction.providers import Provider 
-from django_sanction import urls
+        def do_GET(self):
+            url = urlparse(self.path)
+            if url.path in self.route_handlers:
+                getattr(self, self.route_handlers[url.path])(
+                    dict(parse_qsl(url.query)))
+            else:
+                self.send_response(404)
 
 
-urlpatterns = patterns("",
-    url(r"^$", lambda r: HttpResponse("test"), name="index"),
-    url(r"^o/", include(urls)), 
-)
+        def success(func):
+            def wrapper(self, *args, **kwargs):
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.log_message(self.path)
+                self.end_headers()
+                return func(self, *args, **kwargs)
+            return wrapper
 
 
-class CustomUser(object):
-    pass
+        @success
+        def handle_dialog(self, data):
+            self.wfile.write(dumps({
+                "error": "something_bad_happened"
+            }))
+
+        
+        @success
+        def handle_token(self, data):
+            self.wfile.write(dumps({
+                "access_token": "test_token"
+            }))
+
+        
+        @success
+        def handle_api(self, data):
+            pass
+
+    server_address = ("", 80)
+    server = HTTPServer(server_address, Handler)
+    server.serve_forever()
+else:
+    import subprocess
+
+    from django.conf import settings
+    from django_sanction import Provider
+
+    settings.configure(
+        SECRET_KEY = "UNIT_TEST",
+        URL_CONF = "django_sanction.tests",
+        DATABASES = { 
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',                      
+            }
+        },
+        AUTHENTICATION_BACKENDS = (
+            "django_sanction.backends.AuthenticationBackend",
+        ),
+        AUTH_PROFILE_MODULE = "django_sanction.tests.UserProfile",
+        INSTALLED_APPS = (
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.sites',
+            'django.contrib.messages',
+            'django.contrib.staticfiles', 
+        ),
+        ROOT_URLCONF = "django_sanction.tests",
+        SANCTION_PROVIDERS = {
+            "localhost": Provider(
+                "421833888173.apps.googleusercontent.com",
+                "VueqKFZyz-aoL4rQFleEIT1j",
+                "http://localhost/oauth/dialog",
+                "http://localhost/oauth/token",
+                "http://localhost/api",
+                scope=("email",),
+            ),
+        },
+        SANCTION_AUTH_FN = "django_sanction.tests.auth",
+        SANCTION_GET_USER_FN = "django_sanction.tests.getuser",
+    )
+
+    from django.conf.urls.defaults import patterns, include, url
+    from django.contrib.auth import authenticate
+    from django.contrib.auth.models import User
+    from django.core.management import call_command
+    from django.http import (
+        HttpRequest,
+        HttpResponse,
+    )
+    from django.db import models
+    from django.test import TestCase
+    from django.test.client import Client
+    from django.views.generic import TemplateView
+
+    from django_sanction.backends import AuthenticationBackend
+    from django_sanction import urls
 
 
-def user_lookup(user_id):
-    try:
-        return User.objects.get(id=user_id)
-    except:
+    def auth(request, provider, client):
+        return User.objects.get_or_create(username="test",
+            email="unit@test.com")[0]
+
+
+    def getuser(user_id):
         return None
 
 
-class TestBackend(TestCase):
-    def setUp(self):
-        self.cur_user = User.objects.create(username="test", email="test@test.com",
-            password="foo")
-        self.cur_user.save()
+    urlpatterns = patterns("",
+        url(r"^o/", include(urls)), 
+    )
 
 
-    @staticmethod
-    def user_lookup(user_id):
+    class CustomUser(object):
         pass
 
 
-    def test_init(self):
-        # check failure with no user lookup
+    def user_lookup(user_id):
         try:
-            be = AuthenticationBackend()
-            self.fail("shouldn't hit here")
-        except: pass
-
-        settings.SANCTION_USER_LOOKUP_FN = \
-            "django_sanction.tests.user_lookup"
-
-        # check default user class
-        be = AuthenticationBackend()
-        self.assertEquals(be.user_class, User)
-
-        # check custom user class
-        settings.SANCTION_USER_CLASS = "django_sanction.tests.CustomUser"
-        be = AuthenticationBackend()
-        self.assertEquals(be.user_class, CustomUser)
+            return User.objects.get(id=user_id)
+        except:
+            return None
 
 
-    def test_unbound_lookup(self):
-        # test simple def
-        settings.SANCTION_USER_CLASS = "django_sanction.tests.CustomUser"
-        settings.SANCTION_USER_LOOKUP_FN = \
-            "django_sanction.tests.user_lookup"
-
-        be = AuthenticationBackend()
-        self.assertEquals(be.get_user(-1), None)
+    class TestBackend(TestCase):
+        def setUp(self):
+            self.server = subprocess.Popen(("python", __file__,))
 
 
-    def test_static_lookup(self):
-        # test static method
-        settings.SANCTION_USER_CLASS = "django_sanction.tests.CustomUser"
-        settings.SANCTION_USER_LOOKUP_FN = \
-            "django_sanction.tests.TestBackend.user_lookup"
+        def tearDown(self):
+            try:
+                self.server.kill()
+            except: pass
 
-        be = AuthenticationBackend()
-        self.assertEquals(be.get_user(-1), None)
+        
+        def testAuthenticate(self):
+            for key in settings.SANCTION_PROVIDERS:
+                response = self.client.get("/o/auth/%s" % key.lower(),
+                    HTTP_HOST="unittest")
+                self.assertEquals(response.status_code, 302)
+            
 
-
-    def test_lookup_found(self):
-        self.__init_settings()
-        be = AuthenticationBackend()
-        self.assertEquals(be.get_user(42), None)
-
-        self.assertEquals(be.get_user(self.cur_user.id), self.cur_user)
-
-
-    def test_auth_request(self):
-        self.__init_settings()
-        c = Client()
-        for p in Provider.__subclasses__():
-            name = p.__name__.lower()
-            self.assertEquals(c.get("/o/auth/%s" % name).status_code, 302)
+        def testCode(self):
+            for key in settings.SANCTION_PROVIDERS:
+                response = self.client.get("/o/code/%s" % key.lower(),
+                    HTTP_HOST="unittest")
 
 
-    def test_code_request(self):
-        self.__init_settings()
-        c = Client()
-        for p in Provider.__subclasses__():
-            name = p.__name__.lower()
-            # TODO: Figure out how to test this
-            #self.assertEquals(c.get("/o/code/%s" % name).status_code, 302)
-
-
-    def __init_settings(self):
-        settings.SANCTION_USER_CLASS = "django.contrib.auth.models.User"
-        settings.SANCTION_USER_LOOKUP_FN = \
-            "django_sanction.tests.user_lookup"
-
-
-call_command("syncdb", interactive=False)
+    call_command("syncdb", interactive=False)
 

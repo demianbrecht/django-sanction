@@ -48,11 +48,7 @@ class AuthenticationBackend(object):
         assert(provider is not None)
         assert(client is not None)
 
-        if hasattr(settings, "SANCTION_AUTHENTICATE_FN"):
-            return getattr(settings, "SANCTION_AUTHENTICATE_FN")(request,
-                provider, client)
-        else:
-            return self.__authenticate_fn(request, provider, client)
+        return self.__authenticate_fn(request, provider, client)
 
 
     def get_user(self, user_id):

@@ -33,7 +33,7 @@ def auth_login(request, provider, client):
     if user is not None:
         login(request, user)
     else:
-        raise Exception("TODO")
+        return HttpResponseForbidden()
 
     return redirect(settings.LOGIN_REDIRECT_URL)
 

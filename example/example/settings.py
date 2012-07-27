@@ -2,19 +2,30 @@
 # Django settings for example project.
 from os.path import dirname
 
+from django_sanction import Provider
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-SANCTION_GOOGLE_CLIENT_ID = "421833888173.apps.googleusercontent.com"
-SANCTION_GOOGLE_CLIENT_SECRET = "VueqKFZyz-aoL4rQFleEIT1j"
-SANCTION_GOOGLE_SCOPE = ("email",)
-SANCTION_FACEBOOK_CLIENT_ID = "152107704926343"
-SANCTION_FACEBOOK_CLIENT_SECRET = "80c81e4d7d5bc68ecc8cf1da0213382e"
-SANCTION_FACEBOOK_SCOPE = ("email",)
-SANCTION_PROVIDERS = (
-    "django_sanction.providers.Google",
-    "django_sanction.providers.Facebook",
-)
+SANCTION_PROVIDERS = {
+    "google": Provider("google", 
+        "421833888173.apps.googleusercontent.com",
+        "VueqKFZyz-aoL4rQFleEIT1j",
+        "https://accounts.google.com/o/oauth2/auth",
+        "https://accounts.google.com/o/oauth2/token",
+        "https://www.googleapis.com/oauth2/v1",
+        scope=("email",),
+    ),
+    "facebook": Provider("facebook", 
+        "1521077049263",
+        "80c81e4d7d5bc68ecc8cf1da0213382e",
+        "https://www.facebook.com/dialog/oauth",
+        "https://graph.facebook.com/oauth/access_token",
+        "https://graph.facebook.com",
+        scope=("email",),
+    ),
+}
+
 SANCTION_GET_USER_FN = "example.auth.get_user"
 SANCTION_AUTH_FN = "example.auth.authenticate"
 
@@ -175,3 +186,4 @@ LOGGING = {
         },
     }
 }
+
