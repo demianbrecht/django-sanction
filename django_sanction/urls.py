@@ -23,7 +23,7 @@ def append_auth_uri(key, provider, client):
 def append_code_uri(key, provider, client):
     global urlpatterns
     urlpatterns += patterns("",
-        url(r"^code/%s" % key, lambda r: auth_login(r, provider, client), 
+        url(r"^code/%s" % key, lambda r: auth_login(r, provider, client),
             name=provider.code_view_name))
     
 

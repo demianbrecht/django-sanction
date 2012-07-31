@@ -2,23 +2,15 @@
 import inspect
 
 from django.conf import settings
-from util import get_def
 
-
-_SESSION_USER_ID_KEY = "user_id"
-
-GRANT_TYPE_AUTHORIZATION_CODE = "code"
-GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
+from django_sanction.models import User
+from django_sanction.util import get_def
 
 
 class AuthenticationBackend(object):
     def __init__(self):
         if not hasattr(settings, "SANCTION_AUTH_FN"):
             raise KeyError("SANCTION_AUTH_FN must be in settings.py")
-
-        if not hasattr(settings, "SANCTION_GET_USER_FN"):
-            raise KeyError(
-                "SANCTION_GET_USER_FN must be present in settings.py")
 
 
     @property
@@ -48,11 +40,15 @@ class AuthenticationBackend(object):
         assert(provider is not None)
         assert(client is not None)
 
-        return self.__authenticate_fn(request, provider, client)
+        user = self.__authenticate_fn(request, provider, client)
+        return user 
 
 
     def get_user(self, user_id):
-        return self.__get_user_fn(user_id)
+        if hasattr(settings, "SANCTION_GET_USER_FN"):
+            return self.__get_user_fn(user_id)
+        else:
+            return User.objects.get(id=user_id)
 
     
    

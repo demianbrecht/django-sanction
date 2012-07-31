@@ -4,6 +4,7 @@ from BaseHTTPServer import (
     HTTPServer,
 )
 from json import dumps
+import time
 from urlparse import (
     parse_qsl,
     urlparse
@@ -15,7 +16,8 @@ if __name__=="__main__":
         route_handlers = {
             "/oauth/dialog": "handle_dialog",
             "/oauth/token": "handle_token",
-            "/oauth/api": "handle_api",
+            "/api": "handle_api",
+            "/api/me": "handle_me", 
         }
 
         def do_POST(self):
@@ -53,11 +55,21 @@ if __name__=="__main__":
                 "access_token": "test_token"
             }))
 
+
+        @success
+        def handle_me(self, data):
+            self.wfile.write(dumps({
+                "email": "unit@test.com",
+                "expires": time.time()
+            }))
+
         
         @success
         def handle_api(self, data):
             pass
 
+
     server_address = ("", 80)
     server = HTTPServer(server_address, Handler)
     server.serve_forever()
+

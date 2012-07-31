@@ -17,7 +17,6 @@ settings.configure(
     AUTHENTICATION_BACKENDS = (
         "django_sanction.backends.AuthenticationBackend",
     ),
-    AUTH_PROFILE_MODULE = "django_sanction.tests.UserProfile",
     INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -25,10 +24,20 @@ settings.configure(
         'django.contrib.sites',
         'django.contrib.messages',
         'django.contrib.staticfiles', 
+        "django_sanction",
+    ),
+    MIDDLEWARE_CLASSES = (
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        "django_sanction.middleware.AuthMiddleware",
     ),
     ROOT_URLCONF = "django_sanction.tests",
     SANCTION_PROVIDERS = {
         "localhost": Provider(
+            "localhost",
             "421833888173.apps.googleusercontent.com",
             "VueqKFZyz-aoL4rQFleEIT1j",
             "http://localhost/oauth/dialog",
@@ -38,12 +47,10 @@ settings.configure(
         ),
     },
     SANCTION_AUTH_FN = "django_sanction.tests.auth",
-    SANCTION_GET_USER_FN = "django_sanction.tests.getuser",
 )
 
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.http import (
     HttpRequest,
@@ -55,35 +62,36 @@ from django.test.client import Client
 from django.views.generic import TemplateView
 
 from django_sanction.backends import AuthenticationBackend
+from django_sanction.models import User
 from django_sanction import urls
 
 
+# a custom authentication method *MUST* be provided in order to
+# get the email address
 def auth(request, provider, client):
+    data = client.request("/me")
+
     return User.objects.get_or_create(username="test",
-        email="unit@test.com")[0]
+        email=data["email"], access_token=client.access_token,
+        provider_key=provider.name,
+        expires=data.get("expires", -1))[0]
 
 
-def getuser(user_id):
-    return None
+def render_profile(request):
+    assert(request.user.resource_endpoint.access_token\
+        == request.user.access_token)
+    assert(request.user.resource_endpoint.expires != -1)
+
+    return HttpResponse("hello, world")
 
 
 urlpatterns = patterns("",
     url(r"^o/", include(urls)), 
+    url(r"^accounts/profile/$", render_profile),
 )
 
 
-class CustomUser(object):
-    pass
-
-
-def user_lookup(user_id):
-    try:
-        return User.objects.get(id=user_id)
-    except:
-        return None
-
-
-class TestBackend(TestCase):
+class TestDefaultBackend(TestCase):
     def setUp(self):
         self.server = subprocess.Popen(("python", "%s/test_server.py" % (
             dirname(__file__))))
@@ -105,7 +113,7 @@ class TestBackend(TestCase):
     def testCode(self):
         for key in settings.SANCTION_PROVIDERS:
             response = self.client.get("/o/code/%s" % key.lower(),
-                HTTP_HOST="unittest")
+                HTTP_HOST="unittest", follow=True)
 
 
 call_command("syncdb", interactive=False)
