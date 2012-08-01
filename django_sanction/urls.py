@@ -28,18 +28,17 @@ def append_code_uri(key, provider, client):
     
 
 providers = getattr(settings, "SANCTION_PROVIDERS")
-for key in providers:
-    p = providers[key] 
+for p in providers:
     c = Client(auth_endpoint = p.auth_endpoint,
         token_endpoint = p.token_endpoint,
         resource_endpoint = p.resource_endpoint,
         client_id = p.client_id,
         client_secret = p.client_secret)
 
-    name = key.lower()
+    name = p.name.lower()
     p.auth_view_name = "sanction-%s-auth" % name 
     p.code_view_name = "sanction-%s-code" % name 
 
-    append_code_uri(key.lower(), p, c)
-    append_auth_uri(key.lower(), p, c)
+    append_code_uri(name, p, c)
+    append_auth_uri(name, p, c)
 

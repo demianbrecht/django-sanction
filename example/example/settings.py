@@ -8,8 +8,8 @@ from example.util import parse_url
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-SANCTION_PROVIDERS = {
-    "google": Provider("google", 
+SANCTION_PROVIDERS = ( 
+    Provider("google", 
         "421833888173.apps.googleusercontent.com",
         "VueqKFZyz-aoL4rQFleEIT1j",
         "https://accounts.google.com/o/oauth2/auth",
@@ -17,7 +17,7 @@ SANCTION_PROVIDERS = {
         "https://www.googleapis.com/oauth2/v1",
         scope=("email",),
     ),
-    "facebook": Provider("facebook", 
+    Provider("facebook", 
         "152107704926343",
         "80c81e4d7d5bc68ecc8cf1da0213382e",
         "https://www.facebook.com/dialog/oauth",
@@ -26,7 +26,7 @@ SANCTION_PROVIDERS = {
         scope=("email",),
         parser=parse_url,
     ),
-}
+)
 
 SANCTION_AUTH_FN = "example.auth.authenticate"
 
