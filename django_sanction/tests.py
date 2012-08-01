@@ -35,8 +35,8 @@ settings.configure(
         "django_sanction.middleware.AuthMiddleware",
     ),
     ROOT_URLCONF = "django_sanction.tests",
-    SANCTION_PROVIDERS = {
-        "localhost": Provider(
+    SANCTION_PROVIDERS = ( 
+        Provider(
             "localhost",
             "421833888173.apps.googleusercontent.com",
             "VueqKFZyz-aoL4rQFleEIT1j",
@@ -45,7 +45,7 @@ settings.configure(
             "http://localhost/api",
             scope=("email",),
         ),
-    },
+    ),
 )
 
 from django.db import models
@@ -114,15 +114,15 @@ class TestDefaultBackend(TestCase):
 
 
     def testAuthenticate(self):
-        for key in settings.SANCTION_PROVIDERS:
-            response = self.client.get("/o/auth/%s" % key.lower(),
+        for p in settings.SANCTION_PROVIDERS:
+            response = self.client.get("/o/auth/%s" % p.name.lower(),
                 HTTP_HOST="unittest")
             self.assertEquals(response.status_code, 302)
 
 
     def testCode(self):
-        for key in settings.SANCTION_PROVIDERS:
-            response = self.client.get("/o/code/%s" % key.lower(),
+        for p in settings.SANCTION_PROVIDERS:
+            response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
 
 
@@ -167,8 +167,8 @@ class TestBackendCustom(TestCase):
 
 
     def testCode(self):
-        for key in settings.SANCTION_PROVIDERS:
-            response = self.client.get("/o/code/%s" % key.lower(),
+        for p in settings.SANCTION_PROVIDERS:
+            response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
 
 

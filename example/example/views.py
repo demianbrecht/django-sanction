@@ -8,8 +8,7 @@ class Home(TemplateView):
 
 	def get_context_data(self, **kwargs):
 		return {
-			"providers": [settings.SANCTION_PROVIDERS[key] for key in \
-				settings.SANCTION_PROVIDERS]
+			"providers": settings.SANCTION_PROVIDERS,
 		}
 
 

@@ -6,9 +6,8 @@ from sanction.client import Client
 class AuthMiddleware(object):
     def process_request(self, request):
         if not request.user.is_anonymous():
-            assert(request.user.provider_key in settings.SANCTION_PROVIDERS)
-
-            provider = settings.SANCTION_PROVIDERS[request.user.provider_key]
+            provider = filter(lambda p: p.name == request.user.provider_key,
+                settings.SANCTION_PROVIDERS)[-1]
             c = Client(token_endpoint=provider.token_endpoint,
                 resource_endpoint=provider.resource_endpoint,
                 auth_endpoint=provider.auth_endpoint,

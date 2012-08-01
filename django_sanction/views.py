@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
+from django.http import HttpResponseForbidden
 
 from sanction.client import Client
 
