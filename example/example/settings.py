@@ -3,6 +3,7 @@
 from os.path import dirname
 
 from django_sanction import Provider
+from example.util import parse_url
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -17,16 +18,16 @@ SANCTION_PROVIDERS = {
         scope=("email",),
     ),
     "facebook": Provider("facebook", 
-        "1521077049263",
+        "152107704926343",
         "80c81e4d7d5bc68ecc8cf1da0213382e",
         "https://www.facebook.com/dialog/oauth",
         "https://graph.facebook.com/oauth/access_token",
         "https://graph.facebook.com",
         scope=("email",),
+        parser=parse_url,
     ),
 }
 
-SANCTION_GET_USER_FN = "example.auth.get_user"
 SANCTION_AUTH_FN = "example.auth.authenticate"
 
 AUTHENTICATION_BACKENDS = (
