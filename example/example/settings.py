@@ -26,6 +26,14 @@ SANCTION_PROVIDERS = (
         scope=("email",),
         parser=parse_url,
     ),
+    Provider("github",
+        "12837d83a5d8b94f605b",
+        "2261a9513a65007c16be0a8978b600db1f64dd14",
+        "https://github.com/login/oauth/authorize",
+        "https://github.com/login/oauth/access_token",
+        "https://api.github.com",
+        parser=parse_url,
+    ),
 )
 
 SANCTION_AUTH_FN = "example.auth.authenticate"

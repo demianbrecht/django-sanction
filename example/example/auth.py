@@ -14,7 +14,7 @@ def authenticate(request, provider, client):
     key = provider.name.lower()
     data_map[key](client)
     user.access_token = data_map[key](client)["access_token"]
-    user.expires = data_map[key](client)["expires"]
+    user.expires = data_map[key](client).get("expires", -1)
     user.save()
 
     return user
@@ -24,6 +24,12 @@ def get_google_data(client):
     return {
         "access_token": client.access_token,
         "expires": time.time() + float(client.expires_in),
+    }
+
+
+def get_github_data(client):
+    return {
+        "access_token": client.access_token,
     }
 
 
@@ -41,13 +47,20 @@ def get_google_email(client):
 def get_facebook_email(client):
     return client.request("/me")["email"]
 
+
+def get_github_email(client):
+    return client.request("/user/emails")[0]
+
+
 data_map = {
     "google": get_google_data,
     "facebook": get_facebook_data,
+    "github": get_github_data,
 }
 
 lookup_map = {
     "google": get_google_email, 
     "facebook": get_facebook_email,
+    "github": get_github_email,
 }
 
