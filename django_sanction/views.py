@@ -45,7 +45,8 @@ def auth_redirect(request, provider, client):
 
 def auth_login(request, provider, client):
     if getattr(settings, _AUTHENTICATION_USE_CSRF, True):
-        if not constant_time_compare(get_token(request), request.GET["state"]):
+        if not request.GET.has_key("state") or \
+            not constant_time_compare(get_token(request), request.GET["state"]):
             return HttpResponseForbidden()
 
     client.redirect_uri = _get_redirect_uri(request, provider)

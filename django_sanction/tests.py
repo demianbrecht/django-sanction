@@ -17,6 +17,7 @@ settings.configure(
     AUTHENTICATION_BACKENDS = (
         "django_sanction.backends.AuthenticationBackend",
     ),
+    AUTHENTICATION_USE_CSRF = False, # for most tests
     INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
