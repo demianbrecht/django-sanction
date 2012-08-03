@@ -4,3 +4,5 @@ build
 .coverage
 *.pyc
 *.egg-info
+lib.tags
+tags

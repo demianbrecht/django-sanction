@@ -3,7 +3,10 @@
 from os.path import dirname
 
 from django_sanction import Provider
-from example.util import parse_url
+from example.util import (
+    parse_url,
+    unzip,
+)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -15,7 +18,7 @@ SANCTION_PROVIDERS = (
         "https://accounts.google.com/o/oauth2/auth",
         "https://accounts.google.com/o/oauth2/token",
         "https://www.googleapis.com/oauth2/v1",
-        scope=("email",),
+        scope=("email",)
     ),
     Provider("facebook", 
         "152107704926343",
@@ -24,7 +27,7 @@ SANCTION_PROVIDERS = (
         "https://graph.facebook.com/oauth/access_token",
         "https://graph.facebook.com",
         scope=("email",),
-        parser=parse_url,
+        parser=parse_url
     ),
     Provider("github",
         "12837d83a5d8b94f605b",
@@ -32,7 +35,15 @@ SANCTION_PROVIDERS = (
         "https://github.com/login/oauth/authorize",
         "https://github.com/login/oauth/access_token",
         "https://api.github.com",
-        parser=parse_url,
+        parser=parse_url
+    ),
+    Provider("stackexchange",
+        "543",
+        "pbLJjRO3bk)*J12OKfDbMw((",
+        "https://stackexchange.com/oauth",
+        "https://stackexchange.com/oauth/access_token",
+        "https://api.stackexchange.com/2.0",
+        parser=parse_url
     ),
 )
 
