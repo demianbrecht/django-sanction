@@ -9,14 +9,14 @@ from example.util import parse_url, unzip
 # an authenticate method must be custom to the application in order
 # to provider per-provider user data
 def authenticate(request, provider, client):
-    email = lookup_map[provider.name.lower()](client)
+    user_data = lookup_map[provider.name.lower()](client)
     user = User.objects.get_or_create(
-        username="%s_%s" % (provider.name.lower(), email,),
-        email=email,
+        username="%s_%s" % (provider.name.lower(), user_data["id"],),
+        provider_id=user_data["id"],
+        email=user_data["email"],
         provider_key=provider.name)[0]
 
     key = provider.name.lower()
-    data_map[key](client)
     user.access_token = data_map[key](client)["access_token"]
     user.expires = data_map[key](client).get("expires", -1)
     user.save()
@@ -50,25 +50,38 @@ def get_stackexchange_data(client):
     }
 
 
-def get_google_email(client):
-    return client.request("/userinfo")["email"]
+def get_google_user(client):
+    data = client.request("/userinfo")
+    return {
+        "id": data["id"],
+        "email": data["email"],
+    }
 
 
-def get_facebook_email(client):
-    return client.request("/me")["email"]
+def get_facebook_user(client):
+    data = client.request("/me")
+    return {
+        "id": data["id"],
+        "email": data["email"]
+    }
 
 
-def get_github_email(client):
-    return client.request("/user/emails")[0]
+def get_github_user(client):
+    return {
+        "id": client.request("/user")["id"],
+        "email": client.request("/user/emails")[0],
+    }
 
 
-def get_stackexchange_email(client):
-    import pdb; pdb.set_trace()
-    r = client.request("/me", qs={
+def get_stackexchange_user(client):
+    data = client.request("/me", qs={
         "site": "stackoverflow.com",
         "key": "BbzA7ovVcI*4NtPJCc59CA((",
     }, parser=lambda d: loads(unzip(d)))
-    return r
+    return {
+        "id": data["items"][0]["user_id"],
+        "email": None,
+    }
 
 
 data_map = {
@@ -79,9 +92,9 @@ data_map = {
 }
 
 lookup_map = {
-    "google": get_google_email, 
-    "facebook": get_facebook_email,
-    "github": get_github_email,
-    "stackexchange": get_stackexchange_email,
+    "google": get_google_user, 
+    "facebook": get_facebook_user,
+    "github": get_github_user,
+    "stackexchange": get_stackexchange_user,
 }
 

@@ -10,7 +10,9 @@ from views import (
 
 from sanction.client import Client
 
-urlpatterns = patterns("") 
+urlpatterns = patterns("",
+    url(r"^logout/$", "django.contrib.auth.views.logout"),
+) 
 
 def append_auth_uri(key, provider, client):
     global urlpatterns
@@ -27,8 +29,7 @@ def append_code_uri(key, provider, client):
             name=provider.code_view_name))
     
 
-providers = getattr(settings, "SANCTION_PROVIDERS")
-for p in providers:
+for p in getattr(settings, "OAUTH2_PROVIDERS", None):
     c = Client(auth_endpoint = p.auth_endpoint,
         token_endpoint = p.token_endpoint,
         resource_endpoint = p.resource_endpoint,

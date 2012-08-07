@@ -18,7 +18,7 @@ SANCTION_PROVIDERS = (
         "https://accounts.google.com/o/oauth2/auth",
         "https://accounts.google.com/o/oauth2/token",
         "https://www.googleapis.com/oauth2/v1",
-        scope=("email",)
+        scope=("email", "https://www.googleapis.com/auth/userinfo.profile",)
     ),
     Provider("facebook", 
         "152107704926343",

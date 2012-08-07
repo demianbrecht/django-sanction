@@ -36,7 +36,7 @@ settings.configure(
         "django_sanction.middleware.AuthMiddleware",
     ),
     ROOT_URLCONF = "django_sanction.tests",
-    SANCTION_PROVIDERS = ( 
+    OAUTH2_PROVIDERS = ( 
         Provider(
             "localhost",
             "421833888173.apps.googleusercontent.com",
