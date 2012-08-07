@@ -85,12 +85,12 @@ urlpatterns = patterns("",
 
 class TestDefaultBackend(TestCase):
     def setUp(self):
-        settings.SANCTION_AUTH_FN = \
+        settings.OAUTH2_AUTH_FN = \
             "django_sanction.tests.TestDefaultBackend.auth"
-        if hasattr(settings, "SANCTION_GET_USER_FN"):
-            delattr(settings, "SANCTION_GET_USER_FN")
-        if hasattr(settings, "SANCTION_USER_CLASS"):
-            delattr(settings, "SANCTION_USER_CLASS")
+        if hasattr(settings, "OAUTH2_GET_USER_FN"):
+            delattr(settings, "OAUTH2_GET_USER_FN")
+        if hasattr(settings, "OAUTH2_USER_CLASS"):
+            delattr(settings, "OAUTH2_USER_CLASS")
 
         self.server = subprocess.Popen(("python", "%s/test_server.py" % (
             dirname(__file__))))
@@ -115,14 +115,14 @@ class TestDefaultBackend(TestCase):
 
 
     def testAuthenticate(self):
-        for p in settings.SANCTION_PROVIDERS:
+        for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/auth/%s" % p.name.lower(),
                 HTTP_HOST="unittest")
             self.assertEquals(response.status_code, 302)
 
 
     def testCode(self):
-        for p in settings.SANCTION_PROVIDERS:
+        for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
 
@@ -135,10 +135,10 @@ class CustomUser(django.contrib.auth.models.User):
 
 class TestBackendCustom(TestCase):
     def setUp(self):
-        settings.SANCTION_USER_CLASS = "django_sanction.tests.CustomUser"
-        settings.SANCTION_AUTH_FN = \
+        settings.OAUTH2_USER_CLASS = "django_sanction.tests.CustomUser"
+        settings.OAUTH2_AUTH_FN = \
             "django_sanction.tests.TestBackendCustom.auth"
-        settings.SANCTION_GET_USER_FN = \
+        settings.OAUTH2_GET_USER_FN = \
             "django_sanction.tests.TestBackendCustom.get_user"
         self.server = subprocess.Popen(("python", "%s/test_server.py" % (
             dirname(__file__))))
@@ -168,7 +168,7 @@ class TestBackendCustom(TestCase):
 
 
     def testCode(self):
-        for p in settings.SANCTION_PROVIDERS:
+        for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
 

@@ -9,8 +9,7 @@ from django_sanction.util import get_def
 
 class AuthenticationBackend(object):
     def __init__(self):
-        if not hasattr(settings, "SANCTION_AUTH_FN"):
-            raise KeyError("SANCTION_AUTH_FN must be in settings.py")
+        assert(hasattr(settings, "OAUTH2_AUTH_FN"))
 
 
     @property
@@ -20,12 +19,12 @@ class AuthenticationBackend(object):
     
     @property
     def __authenticate_fn(self):
-        return self.__get_callable_def(settings, "SANCTION_AUTH_FN")
+        return self.__get_callable_def(settings, "OAUTH2_AUTH_FN")
 
 
     @property
     def __get_user_fn(self):
-        return self.__get_callable_def(settings, "SANCTION_GET_USER_FN")
+        return self.__get_callable_def(settings, "OAUTH2_GET_USER_FN")
 
 
     def __get_callable_def(self, obj, key):
@@ -45,7 +44,7 @@ class AuthenticationBackend(object):
 
 
     def get_user(self, user_id):
-        if hasattr(settings, "SANCTION_GET_USER_FN"):
+        if hasattr(settings, "OAUTH2_GET_USER_FN"):
             return self.__get_user_fn(user_id)
         else:
             return User.objects.get(id=user_id)
@@ -53,7 +52,7 @@ class AuthenticationBackend(object):
     
    
     def __get_user_class(self):
-        mod_name = getattr(settings, "SANCTION_USER_CLASS",
+        mod_name = getattr(settings, "OAUTH2_USER_CLASS",
             "django.contrib.auth.models.User")
         c = get_def(mod_name)
 

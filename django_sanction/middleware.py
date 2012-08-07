@@ -7,7 +7,7 @@ class AuthMiddleware(object):
     def process_request(self, request):
         if not request.user.is_anonymous():
             provider = filter(lambda p: p.name == request.user.provider_key,
-                settings.SANCTION_PROVIDERS)[-1]
+                settings.OAUTH2_PROVIDERS)[-1]
             c = Client(token_endpoint=provider.token_endpoint,
                 resource_endpoint=provider.resource_endpoint,
                 auth_endpoint=provider.auth_endpoint,

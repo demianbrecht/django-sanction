@@ -76,19 +76,10 @@ def _get_redirect_uri(request, provider):
 
 
 def _get_scheme(request):
-    if hasattr(settings, "SANCTION_REDIRECT_URL_SCHEME"):
-        scheme = getattr(settings, "SANCTION_REDIRECT_URL_SCHEME")
-    else:
-        scheme = request.META.get("wsgi.url_scheme", "http")
-
-    return scheme
+    return getattr(settings, "OAUTH2_REDIRECT_URL_SCHEME",
+        request.META.get("wsgi.url_scheme", "http"))
 
 
 def _get_host(request):
-    if hasattr(settings, "SANCTION_HOST"):
-        host = getattr(settings, "SANCTION_HOST")
-    else:
-        host = request.META["HTTP_HOST"]
-
-    return host
+    return getattr(settings, "OAUTH2_HOST", request.META["HTTP_HOST"])
 

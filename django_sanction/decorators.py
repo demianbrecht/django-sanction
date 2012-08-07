@@ -1,4 +1,6 @@
 # vim: ts=4 sw=4 et:
+from django.conf import settings
+from django.shortcuts import redirect
 
 def anonymous_required(fn):
     def inner(*args, **kwargs):

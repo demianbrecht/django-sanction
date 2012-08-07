@@ -11,7 +11,7 @@ from example.util import (
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-SANCTION_PROVIDERS = ( 
+OAUTH2_PROVIDERS = ( 
     Provider("google", 
         "421833888173.apps.googleusercontent.com",
         "VueqKFZyz-aoL4rQFleEIT1j",
@@ -47,7 +47,7 @@ SANCTION_PROVIDERS = (
     ),
 )
 
-SANCTION_AUTH_FN = "example.auth.authenticate"
+OAUTH2_AUTH_FN = "example.auth.authenticate"
 
 AUTHENTICATION_BACKENDS = (
     "django_sanction.backends.AuthenticationBackend",
