@@ -9,7 +9,10 @@ from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.http import HttpResponseForbidden
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+)
 from django.utils.crypto import (
     constant_time_compare,
 )
@@ -58,7 +61,18 @@ def auth_login(request, provider, client):
     if hasattr(provider, "grant_type"):
         kwargs["grant_type"] = getattr(provider, "grant_type")
 
-    client.request_token(**kwargs)
+    try:
+        client.request_token(**kwargs)
+    except IOError as e:
+        if hasattr(settings, "OAUTH2_EXCEPTION_URL"):
+            url = "%s?%s" % (getattr(settings, "OAUTH2_EXCEPTION_URL"),
+                urlencode({"error": e.message}))
+
+            return HttpResponseRedirect("%s?%s" % (getattr(settings, "OAUTH2_EXCEPTION_URL"),
+                urlencode({"error": e.message})))
+        else:
+            raise e
+
     user = authenticate(request=request, provider=provider,
         client=client)
 

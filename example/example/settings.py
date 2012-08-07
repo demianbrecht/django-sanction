@@ -47,6 +47,7 @@ OAUTH2_PROVIDERS = (
     ),
 )
 
+OAUTH2_EXCEPTION_URL = "/o/error"
 OAUTH2_AUTH_FN = "example.auth.authenticate"
 
 AUTHENTICATION_BACKENDS = (
