@@ -10,7 +10,7 @@ test:
 example:
 	cd example; \
 	rm sql.db; \
-	python manage.py syncdb; \
+	python manage.py syncdb --noinput; \
 	python manage.py runserver 80
 
 
