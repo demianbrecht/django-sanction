@@ -5,7 +5,6 @@ from os.path import dirname
 from django_sanction import Provider
 from example.util import (
     parse_url,
-    unzip,
 )
 
 DEBUG = True
@@ -150,6 +149,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_sanction.middleware.ResourceMiddleware",
 )
 
 ROOT_URLCONF = 'example.urls'

@@ -9,7 +9,7 @@ def parse_url(data):
 	return dict(parse_qsl(data))
 
 
-def unzip(data):
+def gunzip(data):
     s = StringIO(data)
     gz = GzipFile(fileobj=s, mode="rb")
     return gz.read()

@@ -4,7 +4,7 @@ import time
 
 from django_sanction.models import User
 
-from example.util import parse_url, unzip
+from example.util import parse_url, gunzip
 
 # an authenticate method must be custom to the application in order
 # to provider per-provider user data
@@ -77,7 +77,7 @@ def get_stackexchange_user(client):
     data = client.request("/me", qs={
         "site": "stackoverflow.com",
         "key": "BbzA7ovVcI*4NtPJCc59CA((",
-    }, parser=lambda d: loads(unzip(d)))
+    }, parser=lambda d: loads(gunzip(d)))
     return {
         "id": data["items"][0]["user_id"],
         "email": None,

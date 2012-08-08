@@ -1,6 +1,16 @@
+<!-- vim: ts=4 sw=4 et: -->
 <a href="/o/logout">logout</a>
 
-ID: {{ user.id }}
-Email: {{ user.email }}
-Provider: {{ user.provider_key }}
+<div>
+    <h2>Database Data</h2>
+    <p>
+        ID: {{ user.id }}<br/>
+        Email: {{ user.email }}<br/>
+        Provider: {{ user.provider_key }}<br/>
+    </p>
+</div>
 
+<div>
+    <h2>Resource Data</h2>
+    <p>{{ data }}</p>
+</div>
