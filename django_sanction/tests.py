@@ -33,7 +33,7 @@ settings.configure(
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
-        "django_sanction.middleware.AuthMiddleware",
+        "django_sanction.middleware.ResourceMiddleware",
     ),
     ROOT_URLCONF = "django_sanction.tests",
     OAUTH2_PROVIDERS = ( 
@@ -70,9 +70,9 @@ from django_sanction import urls
 
 
 def render_profile(request):
-    assert(request.user.resource_endpoint.access_token\
+    assert(request.user.resource.access_token\
         == request.user.access_token)
-    assert(request.user.resource_endpoint.expires != -1)
+    assert(request.user.resource.expires != -1)
 
     return HttpResponse("hello, world")
 

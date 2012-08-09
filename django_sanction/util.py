@@ -9,7 +9,9 @@ def get_def(name):
 			if m is not None:
 				break
 		except: pass
-	assert(m is not None)
+
+	if m is None:
+		raise ImportError("Unable to import %s" % name)
 
 	for c in p[1:]:
 		m = getattr(m, c)

@@ -11,7 +11,7 @@ from example.util import parse_url, gunzip
 def authenticate(request, provider, client):
     user_data = lookup_map[provider.name.lower()](client)
     user = User.objects.get_or_create(
-        username="%s_%s" % (provider.name.lower(), user_data["id"],),
+        username=None, # we'll want the user to set this somewhere in the app
         provider_id=user_data["id"],
         email=user_data["email"],
         provider_key=provider.name)[0]

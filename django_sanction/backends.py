@@ -44,10 +44,17 @@ class AuthenticationBackend(object):
 
 
     def get_user(self, user_id):
+        try:
+            return self.__get_user_fn(user_id)
+        except:
+            return User.objects.get(id=user_id)
+
+        """
         if hasattr(settings, "OAUTH2_GET_USER_FN"):
             return self.__get_user_fn(user_id)
         else:
             return User.objects.get(id=user_id)
+        """
 
     
    
