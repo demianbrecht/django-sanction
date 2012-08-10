@@ -20,6 +20,6 @@ tags:
 
 
 cloc:
-	cloc . --not-match-f=test.* --not-match-d=example --exclude-lang=YAML,HTML,make
+	cloc . --not-match-f=test.* --not-match-d=example --exclude-lang=YAML,HTML,make,CSS
 
 

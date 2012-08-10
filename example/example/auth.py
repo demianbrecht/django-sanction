@@ -40,7 +40,7 @@ def get_github_data(client):
 def get_facebook_data(client):
     return {
         "access_token": client.access_token,
-        "expires": float(client.expires),
+        "expires": time.time() + float(client.expires),
     }
 
 
