@@ -6,8 +6,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from sanction.client import Client
 
-from django_sanction.models import NEVER_EXPIRES
-
 
 class ResourceMiddleware(object):
     def process_request(self, request):
@@ -18,12 +16,6 @@ class ResourceMiddleware(object):
             if provider is None:
                 raise KeyError("Provider %s doesn't exist" % 
                     request.user.provider_key)
-
-            if request.user.expires != NEVER_EXPIRES and \
-                request.user.expires < time.time():
-
-                if not getattr(settings, "OAUTH2_IGNORE_EXPIRED_TOKEN", False):
-                    return redirect(reverse(provider.auth_view_name) )
 
             c = Client(token_endpoint=provider.token_endpoint,
                 resource_endpoint=provider.resource_endpoint,

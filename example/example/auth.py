@@ -2,12 +2,14 @@
 from json import loads
 import time
 
-from django_sanction.models import User
+from django_sanction.models import (
+    User,
+)
 
 from example.util import parse_url, gunzip
 
 # an authenticate method must be custom to the application in order
-# to provider per-provider user data
+# to provide per-provider user data
 def authenticate(request, provider, client):
     user_data = lookup_map[provider.name.lower()](client)
     user = User.objects.get_or_create(
@@ -18,7 +20,7 @@ def authenticate(request, provider, client):
 
     key = provider.name.lower()
     user.access_token = data_map[key](client)["access_token"]
-    user.expires = data_map[key](client).get("expires", -1)
+    user.expires = data_map[key](client).get("expires", NEVER_EXPIRES)
     user.save()
 
     return user

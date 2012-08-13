@@ -5,8 +5,6 @@ from django.db.models.fields import EmailField
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
 
-NEVER_EXPIRES = -1
-
 
 class User(BaseUser):
     provider_key = models.CharField(max_length=100)

@@ -1,6 +1,6 @@
 .PHONY: test example tags cloc
 
-# yes, i use cygwin atm.. don't judge me 
+# yes, i'm using cygwin atm.. don't judge me 
 PKG_PATH=$(shell cygpath -u `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`)
 
 test:
@@ -20,6 +20,6 @@ tags:
 
 
 cloc:
-	cloc . --not-match-f=test.* --not-match-d=example --exclude-lang=YAML,HTML,make,CSS
+	cloc ./django_sanction --not-match-f=test.*
 
 
