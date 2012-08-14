@@ -18,7 +18,9 @@ def authenticate(request, provider, client):
 
 
     if created:
-        user.username = " "
+        # username should be either set by the user or 
+        # by application logic
+        user.username = "empty"
     user.email = user_data["email"]
     user.first_name = user_data.get("first_name", " ")
     user.last_name = user_data.get("last_name", " ")

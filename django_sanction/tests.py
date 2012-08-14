@@ -53,6 +53,7 @@ from django.db import models
 import django.contrib.auth.models
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User as BaseUser
 from django.core.management import call_command
 from django.http import (
     HttpRequest,
@@ -65,6 +66,7 @@ from django.views.generic import TemplateView
 
 from django_sanction.backends import AuthenticationBackend
 from django_sanction.models import User
+from django_sanction.middleware import ResourceMiddleware
 from django_sanction import urls
 
 
@@ -74,12 +76,16 @@ def render_profile(request):
         == request.user.access_token)
     assert(request.user.resource.expires != -1)
 
-    return HttpResponse("hello, world")
+    return HttpResponse("")
 
+
+def render_home(request):
+    return HttpResponse("")
 
 urlpatterns = patterns("",
     url(r"^o/", include(urls)), 
     url(r"^accounts/profile/$", render_profile),
+    url(r"^$", render_home),
 )
 
 
@@ -114,17 +120,23 @@ class TestDefaultBackend(TestCase):
             expires=data.get("expires", -1))[0]
 
 
-    def testAuthenticate(self):
+    def test_authenticate(self):
         for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/auth/%s" % p.name.lower(),
                 HTTP_HOST="unittest")
             self.assertEquals(response.status_code, 302)
 
 
-    def testCode(self):
+    def test_code(self):
         for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
+
+
+    def test_logout(self):
+        for p in settings.OAUTH2_PROVIDERS:
+            response = self.client.get("/o/logout", follow=True)
+            self.assertEquals(response.status_code, 200)
 
 
 class CustomUser(django.contrib.auth.models.User):
@@ -133,13 +145,13 @@ class CustomUser(django.contrib.auth.models.User):
     provider_key = models.CharField(max_length=100)
 
 
-class TestBackendCustom(TestCase):
+class TestCustomBackend(TestCase):
     def setUp(self):
         settings.OAUTH2_USER_CLASS = "django_sanction.tests.CustomUser"
         settings.OAUTH2_AUTH_FN = \
-            "django_sanction.tests.TestBackendCustom.auth"
+            "django_sanction.tests.TestCustomBackend.auth"
         settings.OAUTH2_GET_USER_FN = \
-            "django_sanction.tests.TestBackendCustom.get_user"
+            "django_sanction.tests.TestCustomBackend.get_user"
         self.server = subprocess.Popen(("python", "%s/test_server.py" % (
             dirname(__file__))))
 
@@ -167,10 +179,49 @@ class TestBackendCustom(TestCase):
         return CustomUser.objects.get(id=user_id)
 
 
-    def testCode(self):
+    def test_code(self):
         for p in settings.OAUTH2_PROVIDERS:
             response = self.client.get("/o/code/%s" % p.name.lower(),
                 HTTP_HOST="unittest", follow=True)
+
+            url, status = response.redirect_chain[-1]
+            self.assertEquals(status, 302)
+
+
+    def test_user_class(self):
+        backend = AuthenticationBackend()
+        self.assertEquals(backend.user_class, CustomUser)
+
+
+    def test_get_user_function(self):
+        backend = AuthenticationBackend()
+        self.assertEquals(backend._AuthenticationBackend__get_user_fn,
+            TestCustomBackend.get_user)
+
+
+    def test_auth_function(self):
+        backend = AuthenticationBackend()
+        self.assertEquals(backend._AuthenticationBackend__authenticate_fn,
+            TestCustomBackend.auth)
+
+
+class TestResourceMiddleware(TestCase):
+    def test_process_request(self):
+        mw = ResourceMiddleware()
+        req = HttpRequest()
+        req.user = User()
+
+        # provider_key = "" here
+        try:
+            req = ResourceMiddleware().process_request(req)
+            self.fail()
+        except: pass
+
+        req = HttpRequest()
+        req.user = BaseUser()
+
+        req = ResourceMiddleware().process_request(req)
+
 
 
 call_command("syncdb", interactive=False)

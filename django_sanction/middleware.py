@@ -16,17 +16,6 @@ class ResourceMiddleware(object):
                 provider = filter(lambda p: p.name == request.user.provider_key,
                     settings.OAUTH2_PROVIDERS)[-1]
 
-                if provider is None:
-                    raise KeyError("Provider %s doesn't exist" % 
-                        request.user.provider_key)
-
-            except:
-                provider = None
-
-
-            # play nice with other authentication backends
-            if provider is not None:
-
                 c = Client(token_endpoint=provider.token_endpoint,
                     resource_endpoint=provider.resource_endpoint,
                     auth_endpoint=provider.auth_endpoint,
@@ -38,4 +27,12 @@ class ResourceMiddleware(object):
                 c.expires = request.user.expires
 
                 setattr(request.user, "resource", c)
+
+            # play nice with other authentication backends
+            except IndexError:
+                raise KeyError("Provider %s doesn't exist" % 
+                    request.user.provider_key)
+            except AttributeError: 
+                # current user isn't a django_sanction user
+                pass
 
