@@ -223,6 +223,15 @@ class TestResourceMiddleware(TestCase):
         req = ResourceMiddleware().process_request(req)
 
 
+class TestUtil(TestCase):
+    def test_get_def(self):
+        from django_sanction.util import get_def
+        try:
+            d = get_def("foo.bar")
+            self.fail()
+        except ImportError:
+            pass
+
 
 call_command("syncdb", interactive=False)
 
