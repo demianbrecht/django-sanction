@@ -11,8 +11,19 @@ from django_sanction.decorators import (
     anonymous_required,
     login_required,
 )
+from django_sanction.models import User
 
 from example.util import gunzip
+
+
+class Error(TemplateView):
+    template_name = "error.html"
+
+    
+    def get_context_data(self, **kwargs):
+        return {
+            "error": self.request.GET.get("error", ""),
+        }
 
 
 class Home(TemplateView):
@@ -41,9 +52,10 @@ class Profile(TemplateView):
 
     def get_context_data(self, **kwargs):
         data = {}
-        if hasattr(self, "get_%s" % self.request.user.provider_key):
-            data = getattr(self, "get_%s" % self.request.user.provider_key)(
-                self.request)
+        if self.request.user.__class__ is User:
+            if hasattr(self, "get_%s" % self.request.user.provider_key):
+                data = getattr(self, "get_%s" % self.request.user.provider_key)(
+                    self.request)
 
         return {
             "user": self.request.user,

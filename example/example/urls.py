@@ -3,11 +3,12 @@ import django_sanction.urls
 from views import (
 	Home,
 	Profile,
+	Error
 )
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
@@ -18,8 +19,9 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 	url(r"^o/", include(django_sanction.urls)),
+	url(r"^o/error", Error.as_view()),
 	url(r"^$", Home.as_view()),
 	url(r"^accounts/profile/$", Profile.as_view()),
 )

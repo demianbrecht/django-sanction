@@ -51,6 +51,7 @@ OAUTH2_AUTH_FN = "example.auth.authenticate"
 
 AUTHENTICATION_BACKENDS = (
     "django_sanction.backends.AuthenticationBackend",
+    "django.contrib.auth.backends.ModelBackend",
 )
 
 
@@ -172,7 +173,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     "reversetag",

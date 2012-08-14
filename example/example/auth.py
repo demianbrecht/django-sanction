@@ -12,43 +12,40 @@ from example.util import parse_url, gunzip
 # to provide per-provider user data
 def authenticate(request, provider, client):
     user_data = lookup_map[provider.name.lower()](client)
-    user = User.objects.get_or_create(
-        username=None, # we'll want the user to set this somewhere in the app
+    user, created = User.objects.get_or_create(
         provider_id=user_data["id"],
-        email=user_data["email"],
-        provider_key=provider.name)[0]
+        provider_key=provider.name)
+
+
+    if created:
+        user.username = " "
+    user.email = user_data["email"]
+    user.first_name = user_data.get("first_name", " ")
+    user.last_name = user_data.get("last_name", " ")
 
     key = provider.name.lower()
-    user.access_token = data_map[key](client)["access_token"]
-    user.expires = data_map[key](client).get("expires", NEVER_EXPIRES)
+    normalized = normalize_attribs(client)
+    user.access_token = normalized["access_token"]
+    user.expires = normalized["expires"]
     user.save()
 
     return user
 
 
-def get_google_data(client):
+def _get_expires_time(client):
+    try:
+        key = filter(lambda attr: hasattr(client, attr), (
+            "expires", "expires_in"))[-1]
+        return time.time() + float(getattr(client, key))
+    except IndexError:
+        return -1
+    
+
+
+def normalize_attribs(client):
     return {
         "access_token": client.access_token,
-        "expires": time.time() + float(client.expires_in),
-    }
-
-
-def get_github_data(client):
-    return {
-        "access_token": client.access_token,
-    }
-
-
-def get_facebook_data(client):
-    return {
-        "access_token": client.access_token,
-        "expires": time.time() + float(client.expires),
-    }
-
-
-def get_stackexchange_data(client):
-    return {
-        "access_token": client.access_token,
+        "expires": _get_expires_time(client), 
     }
 
 
@@ -57,6 +54,8 @@ def get_google_user(client):
     return {
         "id": data["id"],
         "email": data["email"],
+        "first_name": data["given_name"],
+        "last_name": data["family_name"],
     }
 
 
@@ -64,7 +63,9 @@ def get_facebook_user(client):
     data = client.request("/me")
     return {
         "id": data["id"],
-        "email": data["email"]
+        "email": data["email"],
+        "first_name": data["first_name"],
+        "last_name": data["last_name"],
     }
 
 
@@ -85,13 +86,6 @@ def get_stackexchange_user(client):
         "email": None,
     }
 
-
-data_map = {
-    "google": get_google_data,
-    "facebook": get_facebook_data,
-    "github": get_github_data,
-    "stackexchange": get_stackexchange_data,
-}
 
 lookup_map = {
     "google": get_google_user, 
