@@ -23,8 +23,6 @@ from django.middleware.csrf import (
 
 from sanction.client import Client
 
-_AUTHENTICATION_USE_CSRF = "AUTHENTICATION_USE_CSRF"
-
 
 def auth_redirect(request, provider, client):
     kwargs = {}
@@ -34,7 +32,7 @@ def auth_redirect(request, provider, client):
 
     response = redirect(client.auth_uri(**kwargs))
 
-    if getattr(settings, _AUTHENTICATION_USE_CSRF, True):
+    if getattr(settings, "OAUTH2_USE_CSRF", True):
         # inject the state query param
         CsrfViewMiddleware().process_view(request, response, [], {})
         url = list(urlparse(response["location"]))
@@ -47,7 +45,7 @@ def auth_redirect(request, provider, client):
 
 
 def auth_login(request, provider, client):
-    if getattr(settings, _AUTHENTICATION_USE_CSRF, True):
+    if getattr(settings, "OAUTH2_USE_CSRF", True):
         if not request.GET.has_key("state") or \
             not constant_time_compare(get_token(request), request.GET["state"]):
             return HttpResponseForbidden()

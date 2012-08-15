@@ -17,7 +17,6 @@ settings.configure(
     AUTHENTICATION_BACKENDS = (
         "django_sanction.backends.AuthenticationBackend",
     ),
-    AUTHENTICATION_USE_CSRF = False, # for most tests
     INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -47,6 +46,12 @@ settings.configure(
             scope=("email",),
         ),
     ),
+    OAUTH2_USE_CSRF = False, # for most tests
+)
+
+from urlparse import (
+    parse_qsl,
+    urlparse,
 )
 
 from django.db import models
@@ -68,7 +73,10 @@ from django_sanction.backends import AuthenticationBackend
 from django_sanction.models import User
 from django_sanction.middleware import ResourceMiddleware
 from django_sanction import urls
+from django_sanction.views import auth_redirect
+from django_sanction.views import auth_login
 
+from sanction.client import Client as SanctionClient
 
 
 def render_profile(request):
@@ -231,6 +239,43 @@ class TestUtil(TestCase):
             self.fail()
         except ImportError:
             pass
+
+
+class TestViews(TestCase):
+    def test_redirect_with_csrf(self):
+        setattr(settings, "OAUTH2_USE_CSRF", True)
+
+        request = HttpRequest()
+        request.META = {
+            "HTTP_HOST": "unittest"
+        }
+        response = auth_redirect(request, settings.OAUTH2_PROVIDERS[0],
+            SanctionClient(auth_endpoint="http://localhost/oauth/dialog"))
+
+        type_, value = response._headers["location"]
+        parts = urlparse(value)
+
+        self.assertEquals(parts.netloc, "localhost")
+        self.assertEquals(parts.path, "/oauth/dialog")
+        
+        qd = dict(parse_qsl(parts.query))
+        self.assertEquals(qd["response_type"], "code")
+        self.assertEquals(qd["scope"], "email")
+        self.assertIsNotNone(qd["state"])
+
+        setattr(settings, "OAUTH2_USE_CSRF", False)
+
+
+    def test_auth_csrf(self):
+        setattr(settings, "OAUTH2_USE_CSRF", True)
+
+        request = HttpRequest()
+        request.GET = {}
+        response = auth_login(request, settings.OAUTH2_PROVIDERS[0],
+            SanctionClient())
+        self.assertEquals(response.status_code, 403)
+
+        setattr(settings, "OAUTH2_USE_CSRF", False)
 
 
 call_command("syncdb", interactive=False)
