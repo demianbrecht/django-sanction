@@ -59,30 +59,104 @@ section for more details.
 Usage
 =====
 
+Required settings
+-----------------
 
+Define a list of providers in your settings.py file::
+
+    OAUTH2_PROVIDERS = (
+        Provider("google", 
+        "421833888173.apps.googleusercontent.com",
+        "VueqKFZyz-aoL4rQFleEIT1j",
+        "https://accounts.google.com/o/oauth2/auth",
+        "https://accounts.google.com/o/oauth2/token",
+        "https://www.googleapis.com/oauth2/v1",
+        scope=("email", "https://www.googleapis.com/auth/userinfo.profile",)
+    ),
+    Provider("facebook", 
+        "152107704926343",
+        "80c81e4d7d5bc68ecc8cf1da0213382e",
+        "https://www.facebook.com/dialog/oauth",
+        "https://graph.facebook.com/oauth/access_token",
+        "https://graph.facebook.com",
+        scope=("email",),
+        parser=parse_url
+    ),)
+
+As ``django_sanction`` and its parent module ``sanction`` are provider-
+agnostic, you must supply the relevant endpoints for each.
+
+:note: If a provider deviates from the OAuth 2.0 spec in how it returns user
+       data, client code must provide a supporting parser. See Facebook and 
+       StackExchange implementations in the example project.
+
+
+Authentication
+--------------
+
+Implement an authentication routine (see the example project for implementation
+details) and add it to your settings file::
+
+    OAUTH_AUTH_FN = "example.auth.authenticate"
+
+
+Backend
+-------
+
+Add the authentication backend to your settings::
+
+    AUTHENTICATION_BACKENDS = (
+        "django_sanction.backends.AuthenticationBackend",
+    )
+
+``django_sanction`` will play nicely with authentication backends, so it's
+perfectly valid to have multiple backends listed here.
+
+
+Installed application
+---------------------
+
+Add ``django_sanction`` to your list of ``INSTALLED_APPS``.
 
 Settings
 ========
 
-* OAUTH2_PROVIDERS (*required*)
+* OAUTH2_PROVIDERS (**required**)
+
   The list of providers that are accessible to the application. See 
   ``settings.py`` in the example app for a sample implementation.
-* OAUTH2_AUTH_FN (*required*)
+
+* OAUTH2_AUTH_FN (**required**)
+
   The function to use when authenticating a user. As ``django_sanction``
   doesn't know anything about the providers in use, it can't know how
   to construct a user with the provider's resources. As such, this must
   be provided by the user code.
+
 * OAUTH2_EXCEPTION_URL (*suggested*)
+
   The URL to redirect the user to in the event of an OAuth2 exeption.
   An example of this may be if the user declines the authorization of
-  your application.
-* OAUTH2_GET_USER_FN (**optional**)
+  your application. If this is not provided, ``django_sanction`` will simply
+  redirect the user using ``HttpResponseForbidden()``
+
+* OAUTH2_GET_USER_FN (*optional*)
+
   A function to look up the user. This will be required if using an
   alternate persistence mechanism than the one provided.
-* OAUTH2_USER_CLASS (**optional**)
+
+* OAUTH2_USER_CLASS (*optional*)
   The class to use for the user. This defaults to 
   ``django_sanction.models.User``.
-* OAUTH2_REDIRECT_URL_SCHEME
+
+* OAUTH2_REDIRECT_URL_SCHEME (*optional*)
+
+  This should be supplied if the URL scheme (http or https) differs from
+  the current request. This defaults to 
+  ``request.META.get("wsgi.url_scheme", "http")``.
+
+* OAUTH2_HOST (*optional*)
   
-* OAUTH2_HOST
+  Should be used if the HTTP host differs from the current request. This
+  defaults to ``request.META["HTTP_HOST"]``.
 
