@@ -47,7 +47,7 @@ class AuthenticationBackend(object):
    
     def __get_user_class(self):
         mod_name = getattr(settings, "OAUTH2_USER_CLASS",
-            "django.contrib.auth.models.User")
+            "django_sanction.models.User")
         c = get_def(mod_name)
 
         return c
