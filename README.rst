@@ -156,7 +156,31 @@ perfectly valid to have multiple backends listed here.
 Installed application
 ---------------------
 
-Add ``django_sanction`` to your list of ``INSTALLED_APPS``.
+Add ``django_sanction`` to your list of ``INSTALLED_APPS``::
+
+    INSTALLED_APPS = (
+        # ...
+        "django_sanction",
+    )
+
+
+Resource middleware
+-------------------
+
+By using the ``ResourceMiddleware``, a fully usable ``sanction`` ``Client``
+will be added to the current ``request.user``.
+
+Add the middleware::
+
+    MIDDLEWARE_CLASSES = (
+        # ...
+        "django_sanction.middleware.ResourceMiddleware"
+    )
+
+Access resources (i.e. Facebook) once a user has been authenticated::
+
+    request.user.resource.request("/me")
+
 
 Settings
 ========

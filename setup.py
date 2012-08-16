@@ -11,13 +11,13 @@ requires = [
 ]
 
 setup(
-	name="django_sanction",
+	name="django-sanction",
 	keywords="python,oauth2,sanction,django",
 	version="0.1.0",
 	description="A Django front end for the sanction OAuth2 client library",
 	author="Demian Brecht",
 	author_email="demianbrecht@gmail.com",
-	url="https://github.com/demianbrecht/django_sanction",
+	url="https://github.com/demianbrecht/django-sanction",
 	install_requires=requires,
 	long_description=README,
     classifiers=[
