@@ -37,7 +37,8 @@ class Home(TemplateView):
 
     def get_context_data(self, **kwargs):
         return {
-            "providers": settings.OAUTH2_PROVIDERS,
+            "providers": [settings.OAUTH2_PROVIDERS[key] for key in \
+                settings.OAUTH2_PROVIDERS],
         }
 
 

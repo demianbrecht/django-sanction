@@ -2,7 +2,6 @@
 # Django settings for example project.
 from os.path import dirname
 
-from django_sanction import Provider
 from example.util import (
     parse_url,
 )
@@ -10,41 +9,41 @@ from example.util import (
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-OAUTH2_PROVIDERS = ( 
-    Provider("google", 
-        "421833888173.apps.googleusercontent.com",
-        "VueqKFZyz-aoL4rQFleEIT1j",
-        "https://accounts.google.com/o/oauth2/auth",
-        "https://accounts.google.com/o/oauth2/token",
-        "https://www.googleapis.com/oauth2/v1",
-        scope=("email", "https://www.googleapis.com/auth/userinfo.profile",)
-    ),
-    Provider("facebook", 
-        "152107704926343",
-        "80c81e4d7d5bc68ecc8cf1da0213382e",
-        "https://www.facebook.com/dialog/oauth",
-        "https://graph.facebook.com/oauth/access_token",
-        "https://graph.facebook.com",
-        scope=("email",),
-        parser=parse_url
-    ),
-    Provider("github",
-        "12837d83a5d8b94f605b",
-        "2261a9513a65007c16be0a8978b600db1f64dd14",
-        "https://github.com/login/oauth/authorize",
-        "https://github.com/login/oauth/access_token",
-        "https://api.github.com",
-        parser=parse_url
-    ),
-    Provider("stackexchange",
-        "543",
-        "pbLJjRO3bk)*J12OKfDbMw((",
-        "https://stackexchange.com/oauth",
-        "https://stackexchange.com/oauth/access_token",
-        "https://api.stackexchange.com/2.0",
-        parser=parse_url
-    ),
-)
+OAUTH2_PROVIDERS = { 
+    "google": { 
+        "client_id": "421833888173.apps.googleusercontent.com",
+        "client_secret": "VueqKFZyz-aoL4rQFleEIT1j",
+        "auth_endpoint": "https://accounts.google.com/o/oauth2/auth",
+        "token_endpoint": "https://accounts.google.com/o/oauth2/token",
+        "resource_endpoint": "https://www.googleapis.com/oauth2/v1",
+        "scope": ("email", "https://www.googleapis.com/auth/userinfo.profile",)
+    },
+    "facebook": {
+        "client_id": "152107704926343",
+        "client_secret": "80c81e4d7d5bc68ecc8cf1da0213382e",
+        "auth_endpoint": "https://www.facebook.com/dialog/oauth",
+        "token_endpoint": "https://graph.facebook.com/oauth/access_token",
+        "resource_endpoint": "https://graph.facebook.com",
+        "scope": ("email",),
+        "parser": parse_url
+    },
+    "github": {
+        "client_id": "12837d83a5d8b94f605b",
+        "client_secret": "2261a9513a65007c16be0a8978b600db1f64dd14",
+        "auth_endpoint": "https://github.com/login/oauth/authorize",
+        "token_endpoint": "https://github.com/login/oauth/access_token",
+        "resource_endpoint": "https://api.github.com",
+        "parser": parse_url
+    },
+    "stackexchange": {
+        "client_id": "543",
+        "client_secret": "pbLJjRO3bk)*J12OKfDbMw((",
+        "auth_endpoint": "https://stackexchange.com/oauth",
+        "token_endpoint": "https://stackexchange.com/oauth/access_token",
+        "resource_endpoint": "https://api.stackexchange.com/2.0",
+        "parser": parse_url
+    },
+    }
 
 OAUTH2_EXCEPTION_URL = "/o/error"
 OAUTH2_AUTH_FN = "example.auth.authenticate"

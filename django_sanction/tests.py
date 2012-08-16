@@ -3,7 +3,6 @@ from os.path import dirname
 import subprocess
 
 from django.conf import settings
-from django_sanction import Provider
 
 settings.configure(
     SECRET_KEY = "UNIT_TEST",
@@ -35,17 +34,16 @@ settings.configure(
         "django_sanction.middleware.ResourceMiddleware",
     ),
     ROOT_URLCONF = "django_sanction.tests",
-    OAUTH2_PROVIDERS = ( 
-        Provider(
-            "localhost",
-            "421833888173.apps.googleusercontent.com",
-            "VueqKFZyz-aoL4rQFleEIT1j",
-            "http://localhost/oauth/dialog",
-            "http://localhost/oauth/token",
-            "http://localhost/api",
-            scope=("email",),
-        ),
-    ),
+    OAUTH2_PROVIDERS = { 
+        "localhost": { 
+            "client_id": "421833888173.apps.googleusercontent.com",
+            "client_secret": "VueqKFZyz-aoL4rQFleEIT1j",
+            "auth_endpoint": "http://localhost/oauth/dialog",
+            "token_endpoint": "http://localhost/oauth/token",
+            "resource_endpoint": "http://localhost/api",
+            "scope": ("email",),
+            },
+        },
     OAUTH2_USE_CSRF = False, # for most tests
 )
 
@@ -124,20 +122,22 @@ class TestDefaultBackend(TestCase):
 
         return User.objects.get_or_create(username="test",
             email=data["email"], access_token=client.access_token,
-            provider_key=provider.name,
+            provider_key=provider["name"],
             expires=data.get("expires", -1))[0]
 
 
     def test_authenticate(self):
-        for p in settings.OAUTH2_PROVIDERS:
-            response = self.client.get("/o/auth/%s" % p.name.lower(),
+        for k in settings.OAUTH2_PROVIDERS:
+            p = settings.OAUTH2_PROVIDERS[k]
+            response = self.client.get("/o/auth/%s" % p["name"].lower(),
                 HTTP_HOST="unittest")
             self.assertEquals(response.status_code, 302)
 
 
     def test_code(self):
-        for p in settings.OAUTH2_PROVIDERS:
-            response = self.client.get("/o/code/%s" % p.name.lower(),
+        for k in settings.OAUTH2_PROVIDERS:
+            p = settings.OAUTH2_PROVIDERS[k]
+            response = self.client.get("/o/code/%s" % p["name"].lower(),
                 HTTP_HOST="unittest", follow=True)
 
 
@@ -178,7 +178,7 @@ class TestCustomBackend(TestCase):
 
         return CustomUser.objects.get_or_create(email=data["email"],
             access_token=client.access_token,
-            provider_key=provider.name,
+            provider_key=provider["name"],
             expires=data.get("expires", -1))[0]
 
 
@@ -188,8 +188,9 @@ class TestCustomBackend(TestCase):
 
 
     def test_code(self):
-        for p in settings.OAUTH2_PROVIDERS:
-            response = self.client.get("/o/code/%s" % p.name.lower(),
+        for k in settings.OAUTH2_PROVIDERS:
+            p = settings.OAUTH2_PROVIDERS[k]
+            response = self.client.get("/o/code/%s" % p["name"].lower(),
                 HTTP_HOST="unittest", follow=True)
 
             url, status = response.redirect_chain[-1]
@@ -249,19 +250,22 @@ class TestViews(TestCase):
         request.META = {
             "HTTP_HOST": "unittest"
         }
-        response = auth_redirect(request, settings.OAUTH2_PROVIDERS[0],
-            SanctionClient(auth_endpoint="http://localhost/oauth/dialog"))
+        for k in settings.OAUTH2_PROVIDERS:
+            p = settings.OAUTH2_PROVIDERS[k]
 
-        type_, value = response._headers["location"]
-        parts = urlparse(value)
+            response = auth_redirect(request, p,
+                SanctionClient(auth_endpoint="http://localhost/oauth/dialog"))
 
-        self.assertEquals(parts.netloc, "localhost")
-        self.assertEquals(parts.path, "/oauth/dialog")
-        
-        qd = dict(parse_qsl(parts.query))
-        self.assertEquals(qd["response_type"], "code")
-        self.assertEquals(qd["scope"], "email")
-        self.assertIsNotNone(qd["state"])
+            type_, value = response._headers["location"]
+            parts = urlparse(value)
+
+            self.assertEquals(parts.netloc, "localhost")
+            self.assertEquals(parts.path, "/oauth/dialog")
+            
+            qd = dict(parse_qsl(parts.query))
+            self.assertEquals(qd["response_type"], "code")
+            self.assertEquals(qd["scope"], "email")
+            self.assertIsNotNone(qd["state"])
 
         setattr(settings, "OAUTH2_USE_CSRF", False)
 
@@ -269,11 +273,13 @@ class TestViews(TestCase):
     def test_auth_csrf(self):
         setattr(settings, "OAUTH2_USE_CSRF", True)
 
-        request = HttpRequest()
-        request.GET = {}
-        response = auth_login(request, settings.OAUTH2_PROVIDERS[0],
-            SanctionClient())
-        self.assertEquals(response.status_code, 403)
+        for k in settings.OAUTH2_PROVIDERS:
+            p = settings.OAUTH2_PROVIDERS[k]
+
+            request = HttpRequest()
+            request.GET = {}
+            response = auth_login(request, p, SanctionClient())
+            self.assertEquals(response.status_code, 403)
 
         setattr(settings, "OAUTH2_USE_CSRF", False)
 

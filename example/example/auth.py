@@ -11,10 +11,10 @@ from example.util import parse_url, gunzip
 # an authenticate method must be custom to the application in order
 # to provide per-provider user data
 def authenticate(request, provider, client):
-    user_data = lookup_map[provider.name.lower()](client)
+    user_data = lookup_map[provider["name"].lower()](client)
     user, created = User.objects.get_or_create(
         provider_id=user_data["id"],
-        provider_key=provider.name)
+        provider_key=provider["name"])
 
 
     if created:
@@ -25,7 +25,7 @@ def authenticate(request, provider, client):
     user.first_name = user_data.get("first_name", " ")
     user.last_name = user_data.get("last_name", " ")
 
-    key = provider.name.lower()
+    key = provider["name"].lower()
     normalized = normalize_attribs(client)
     user.access_token = normalized["access_token"]
     user.expires = normalized["expires"]

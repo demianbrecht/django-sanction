@@ -26,7 +26,7 @@ from sanction.client import Client
 
 def auth_redirect(request, provider, client):
     kwargs = {}
-    if provider.scope is not None: kwargs["scope"] = provider.scope
+    if "scope" in provider: kwargs["scope"] = provider["scope"]
 
     client.redirect_uri = _get_redirect_uri(request, provider)
 
@@ -51,16 +51,10 @@ def auth_login(request, provider, client):
             return HttpResponseForbidden()
 
     client.redirect_uri = _get_redirect_uri(request, provider)
-    kwargs = {
-        "data": request.GET,
-    }
-    if hasattr(provider, "parser"):
-        kwargs["parser"] = getattr(provider, "parser")
-    if hasattr(provider, "grant_type"):
-        kwargs["grant_type"] = getattr(provider, "grant_type")
 
     try:
-        client.request_token(**kwargs)
+        client.request_token(data=request.GET, parser=provider.get("parser",
+            None), grant_type=provider.get("grant_type", None))
     except IOError as e:
         if hasattr(settings, "OAUTH2_EXCEPTION_URL"):
             url = "%s?%s" % (getattr(settings, "OAUTH2_EXCEPTION_URL"),
@@ -84,7 +78,7 @@ def auth_login(request, provider, client):
 
 def _get_redirect_uri(request, provider):
     return "%s://%s%s" % (_get_scheme(request), _get_host(request), 
-        reverse_lazy(provider.code_view_name))
+        reverse_lazy(provider["code_view_name"]))
 
 
 def _get_scheme(request):

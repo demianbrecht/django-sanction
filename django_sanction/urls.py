@@ -27,26 +27,28 @@ def append_auth_uri(key, provider, client):
     urlpatterns += patterns("",
         url(r"^auth/%s" % key,
             lambda r: auth_redirect(r, provider, client),
-            name=provider.auth_view_name))
+            name=provider["auth_view_name"]))
 
 
 def append_code_uri(key, provider, client):
     global urlpatterns
     urlpatterns += patterns("",
         url(r"^code/%s" % key, lambda r: auth_login(r, provider, client),
-            name=provider.code_view_name))
+            name=provider["code_view_name"]))
     
 
-for p in getattr(settings, "OAUTH2_PROVIDERS", None):
-    c = Client(auth_endpoint = p.auth_endpoint,
-        token_endpoint = p.token_endpoint,
-        resource_endpoint = p.resource_endpoint,
-        client_id = p.client_id,
-        client_secret = p.client_secret)
+for key in getattr(settings, "OAUTH2_PROVIDERS", None):
+    p = settings.OAUTH2_PROVIDERS[key]
+    p["name"] = key
+    c = Client(auth_endpoint = p["auth_endpoint"],
+        token_endpoint = p["token_endpoint"],
+        resource_endpoint = p["resource_endpoint"],
+        client_id = p["client_id"],
+        client_secret = p["client_secret"])
 
-    name = p.name.lower()
-    p.auth_view_name = "oauth2-%s-auth" % name 
-    p.code_view_name = "oauth2-%s-code" % name 
+    name = p["name"].lower()
+    p["auth_view_name"] = "oauth2-%s-auth" % name 
+    p["code_view_name"] = "oauth2-%s-code" % name 
 
     append_code_uri(name, p, c)
     append_auth_uri(name, p, c)

@@ -64,27 +64,67 @@ Required settings
 
 Define a list of providers in your settings.py file::
 
-    OAUTH2_PROVIDERS = (
-        Provider("google", 
-        "421833888173.apps.googleusercontent.com",
-        "VueqKFZyz-aoL4rQFleEIT1j",
-        "https://accounts.google.com/o/oauth2/auth",
-        "https://accounts.google.com/o/oauth2/token",
-        "https://www.googleapis.com/oauth2/v1",
-        scope=("email", "https://www.googleapis.com/auth/userinfo.profile",)
-    ),
-    Provider("facebook", 
-        "152107704926343",
-        "80c81e4d7d5bc68ecc8cf1da0213382e",
-        "https://www.facebook.com/dialog/oauth",
-        "https://graph.facebook.com/oauth/access_token",
-        "https://graph.facebook.com",
-        scope=("email",),
-        parser=parse_url
-    ),)
+    OAUTH2_PROVIDERS = { 
+        "google": { 
+            "client_id": "421833888173.apps.googleusercontent.com",
+            "client_secret": "VueqKFZyz-aoL4rQFleEIT1j",
+            "auth_endpoint": "https://accounts.google.com/o/oauth2/auth",
+            "token_endpoint": "https://accounts.google.com/o/oauth2/token",
+            "resource_endpoint": "https://www.googleapis.com/oauth2/v1",
+            "scope": ("email", "https://www.googleapis.com/auth/userinfo.profile",)
+        },
+        "facebook": {
+            "client_id": "152107704926343",
+            "client_secret": "80c81e4d7d5bc68ecc8cf1da0213382e",
+            "auth_endpoint": "https://www.facebook.com/dialog/oauth",
+            "token_endpoint": "https://graph.facebook.com/oauth/access_token",
+            "resource_endpoint": "https://graph.facebook.com",
+            "scope": ("email",),
+            "parser": parse_url
+        },
+    }
 
 As ``django_sanction`` and its parent module ``sanction`` are provider-
-agnostic, you must supply the relevant endpoints for each.
+agnostic, you must supply the relevant data for each.
+
+Required provider fields
+````````````````````````
+
+* ``client_id``
+
+  The client id as provided by the resource provider
+
+* ``client_secret``
+
+  The client secret as provided by the resource provider
+
+* ``auth_endpoint``
+
+  The providers' auth dialog endpoint to which users will be redirected for authorization
+
+* ``token_endpoint``
+
+  The endpoint used to swap the grant code for an access token
+
+* ``resource_endpoint``
+
+  The endpoint used to access user resources
+
+Optional provider fields
+````````````````````````
+
+* ``scope``
+  
+  A list of scope parameters to request extended permissions from a user
+
+* ``redirect_uri``
+
+  The registered URL that the user will be redirected back to upon authorization
+
+* ``parser``
+
+  The parser to use for returned provider data
+
 
 :note: If a provider deviates from the OAuth 2.0 spec in how it returns user
        data, client code must provide a supporting parser. See Facebook and 
@@ -160,3 +200,5 @@ Settings
   Should be used if the HTTP host differs from the current request. This
   defaults to ``request.META["HTTP_HOST"]``.
 
+.. _sanction: https://github.com/demianbrecht/sanction
+.. _`oauth2 spec`: http://www.google.ca/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&ved=0CGIQFjAA&url=http%3A%2F%2Ftools.ietf.org%2Fhtml%2Fietf-oauth-v2-30&ei=sBAtULqHDqPOiwK3zoDgDg&usg=AFQjCNGSdKvjocQl86fT8e-dp_53zeqR8g
