@@ -164,6 +164,16 @@ Add ``django_sanction`` to your list of ``INSTALLED_APPS``::
     )
 
 
+URLs
+----
+
+Add this to your urls::
+
+    urlpatterns = pattenrs("",
+        # o/ can be sustituted for anything
+        url(r'^o/", include(django_sanction.urls)),
+    )
+
 Resource middleware
 -------------------
 
