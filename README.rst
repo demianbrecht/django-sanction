@@ -137,7 +137,7 @@ Authentication
 Implement an authentication routine (see the example project for implementation
 details) and add it to your settings file::
 
-    OAUTH_AUTH_FN = "example.auth.authenticate"
+    OAUTH2_AUTH_FN = "example.auth.authenticate"
 
 
 Backend
