@@ -7,3 +7,4 @@ build
 lib.tags
 tags
 *.stackdump
+.env
