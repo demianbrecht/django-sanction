@@ -1,6 +1,10 @@
 # vim: ts=4 sw=4 et:
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import (
+    patterns, 
+    include, 
+    url,
+)
 from django.contrib.auth import logout as django_logout
 from django.shortcuts import redirect
 

@@ -32,4 +32,7 @@ setup(
         "Topic :: System :: Systems Administration :: Authentication/Directory"
     ],
 	packages=["django_sanction",],
+	download_url='https://github.com/demianbrecht/django-sanction',
+	platforms=None,
+	license='MIT'
 )

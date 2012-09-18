@@ -1,0 +1,7 @@
+cov-core==1.7
+coverage==3.5.2
+django==1.4.1
+-e git+git@github.com:demianbrecht/django-sanction.git@31919e70fee25e5277f631dd7b3ac6ebcdb55c2e#egg=django_sanction-dev
+nose==1.2.1
+nose-cov==1.6
+sanction==0.1.4
