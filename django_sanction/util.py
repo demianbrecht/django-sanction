@@ -17,3 +17,7 @@ def get_def(name):
 		m = getattr(m, c)
 	return m
 
+
+def get_callable_def(obj, key):
+	fn_name = getattr(obj, key)
+	fnc = get_def(getattr(obj, key))

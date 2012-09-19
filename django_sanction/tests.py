@@ -202,18 +202,6 @@ class TestCustomBackend(TestCase):
         self.assertEquals(backend.user_class, CustomUser)
 
 
-    def test_get_user_function(self):
-        backend = AuthenticationBackend()
-        self.assertEquals(backend._AuthenticationBackend__get_user_fn,
-            TestCustomBackend.get_user)
-
-
-    def test_auth_function(self):
-        backend = AuthenticationBackend()
-        self.assertEquals(backend._AuthenticationBackend__authenticate_fn,
-            TestCustomBackend.auth)
-
-
 class TestResourceMiddleware(TestCase):
     def test_process_request(self):
         mw = ResourceMiddleware()

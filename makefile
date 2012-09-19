@@ -1,4 +1,4 @@
-.PHONY: test example tags cloc
+.PHONY: test example tags cloc lint
 
 # yes, i'm using cygwin atm.. don't judge me 
 PKG_PATH=$(shell cygpath -u `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`)
@@ -21,5 +21,9 @@ tags:
 
 cloc:
 	cloc ./django_sanction --not-match-f=test.*
+
+
+lint:
+	pylint django_sanction --reports=n --include-ids=y
 
 

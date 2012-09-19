@@ -52,18 +52,23 @@ def auth_login(request, provider, client):
 
     client.redirect_uri = _get_redirect_uri(request, provider)
 
+    client.request_token(code=request.GET['code'], parser=provider.get(
+        "parser", None), grant_type=provider.get("grant_type", None))
+
+    """
     try:
-        client.request_token(data=request.GET, parser=provider.get("parser",
-            None), grant_type=provider.get("grant_type", None))
+        client.request_token(code=request.GET['code'], parser=provider.get(
+            "parser", None), grant_type=provider.get("grant_type", None))
     except IOError as e:
         if hasattr(settings, "OAUTH2_EXCEPTION_URL"):
             url = "%s?%s" % (getattr(settings, "OAUTH2_EXCEPTION_URL"),
                 urlencode({"error": e.message}))
 
-            return HttpResponseRedirect("%s?%s" % (getattr(settings, "OAUTH2_EXCEPTION_URL"),
-                urlencode({"error": e.message})))
+            return HttpResponseRedirect("%s?%s" % (getattr(settings, 
+                "OAUTH2_EXCEPTION_URL"), urlencode({"error": e.message})))
         else:
             raise e
+    """
 
     user = authenticate(request=request, provider=provider,
         client=client)

@@ -77,7 +77,7 @@ class Profile(TemplateView):
 
 
     def get_stackexchange(self, request):
-        return request.user.resource.request("/me", qs={
+        return request.user.resource.request("/me", query={
             "site": "stackoverflow.com",
             "key": "BbzA7ovVcI*4NtPJCc59CA((",
             }, parser=lambda d: loads(gunzip(d)))

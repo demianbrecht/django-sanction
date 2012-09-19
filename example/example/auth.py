@@ -79,7 +79,7 @@ def get_github_user(client):
 
 
 def get_stackexchange_user(client):
-    data = client.request("/me", qs={
+    data = client.request("/me", query={
         "site": "stackoverflow.com",
         "key": "BbzA7ovVcI*4NtPJCc59CA((",
     }, parser=lambda d: loads(gunzip(d)))
