@@ -1,6 +1,6 @@
 cov-core==1.7
 coverage==3.5.2
-django==1.4.1
+django==1.5
 nose==1.2.1
 nose-cov==1.6
-sanction==0.1.4
+sanction==0.3

@@ -1,23 +1,5 @@
-def get_def(name):
-	p = name.split(".")
-	
-	m = None
-	for n in range(-1, -len(p), -1):
-		mod = ".".join(p[:n])
-		try:
-			m = __import__(mod)
-			if m is not None:
-				break
-		except: pass
+from importlib import import_module
 
-	if m is None:
-		raise ImportError("Unable to import %s" % name)
-
-	for c in p[1:]:
-		m = getattr(m, c)
-	return m
-
-
-def get_callable_def(obj, key):
-	fn_name = getattr(obj, key)
-	fnc = get_def(getattr(obj, key))
+def import_string(path):
+    mname, cname = path.rsplit('.', 1)
+    return getattr(import_module(mname), cname)

@@ -2,40 +2,31 @@
 """ Django authentication backend
 """
 from django.conf import settings
-
-from django_sanction.models import User
-from django_sanction.util import get_def
-
+from django.contrib.auth import get_user_model
+from sanction.client import Client as SanctionClient
 
 class AuthenticationBackend(object):
-    """ Django authentication backend implementation
-
-    To install, add ``django_sanction.backends.AuthenticationBackend`` to
-    your project's settings' ``AUTHENTICATION_BACKENDS``
-    """
-    def __init__(self):
-        assert(hasattr(settings, 'OAUTH2_AUTH_FN'))
-
-    # pylint: disable=R0201
-    @property
-    def user_class(self):
-        """ The class used to define a user
-        """
-        return get_def(getattr(settings, 'OAUTH2_USER_CLASS',
-            'django_sanction.models.User'))
-    
     # pylint: disable=R0201 
-    def authenticate(self, request=None, provider=None, client=None):
+    def authenticate(self, code=None, provider=None):
         """ Django API function, authenticating a user
+
+        The following attributes are expected to exist on the user instance:
+        * ``id``
+        * ``access_token``
+        * ``provider``
+        * ``token_expires``
+        * ``get_user(provider, access_token)``
         """
-        return get_def(getattr(settings, 'OAUTH2_AUTH_FN'))(
-            request, provider, client)
+        model = get_user_model()
+        provider = settings.SANCTION_PROVIDERS[provider]
+        
+        c = SanctionClient(token_endpoint=provider['token_endpoint'],
+            client_id=provider['client_id'],
+            client_secret=provider['client_secret'],
+            redirect_uri=provider['redirect_uri'])
+        c.request_token(code=code)
+
+        return model.fetch_user(provider, c.access_token)
 
     def get_user(self, user_id):
-        """ User lookup
-        """
-        try:
-            return get_def(getattr(settings, 'OAUTH2_GET_USER_FN'))(
-                user_id)
-        except AttributeError:
-            return User.objects.get(id=user_id)
+        return get_user_model().get_user(user_id)
