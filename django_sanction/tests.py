@@ -6,28 +6,14 @@ from urlparse import urlparse, parse_qsl
 
 from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url
+from django.http import HttpResponseForbidden
 from sanction.client import Client as SanctionClient
-from django_sanction.backends import AuthenticationBackend
 
 # monkey-patch sanction.request_token for tests
 def _request_token(self, **kwargs):
     if 'code' in kwargs:
         self.access_token = 'unit_test_token'
 SanctionClient.request_token = _request_token
-
-class TestUtil(unittest.TestCase):
-    def test_import_string(self):
-        from django_sanction.util import import_string
-        try:
-            import_string('foo.bar')
-        except ImportError:
-            pass
-
-        fn = import_string('django_sanction.util.import_string')
-        self.assertEquals(import_string, fn)
-
-        klass = import_string('django_sanction.backends.AuthenticationBackend')
-        self.assertEquals(klass, AuthenticationBackend)
 
 class TestViews(unittest.TestCase):
     def test_login(self):
@@ -42,6 +28,17 @@ class TestViews(unittest.TestCase):
         self.assertEquals(rloc.scheme, sloc.scheme)
         self.assertEquals(rloc.netloc, sloc.netloc)
         self.assertEquals(rloc.path, sloc.path)
+
+    def test_invalid_csrf(self):
+        c = TestClient()
+        
+        # no state param
+        resp = c.get('/o/login/unit?code=foo')
+        self.assertEquals(type(resp), HttpResponseForbidden)
+
+        # invalid state param
+        resp = c.get('/o/login/unit?code=foo&state=bar')
+        self.assertEquals(type(resp), HttpResponseForbidden)
 
     def test_login_logout(self):
         c = TestClient()

@@ -1,4 +1,6 @@
 # Django settings for example project.
+from os.path import dirname
+from urlparse import parse_qsl
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,8 +13,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '{}/data.sqlite3'.format(dirname(dirname(__file__))),                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -124,6 +126,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_sanction',
+    'core',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -154,3 +158,36 @@ LOGGING = {
         },
     }
 }
+
+SANCTION_PROVIDERS = {
+    'google': {
+        'auth_endpoint': 'https://accounts.google.com/o/oauth2/auth',
+        'token_endpoint': 'https://accounts.google.com/o/oauth2/token',
+        'resource_endpoint': 'https://www.googleapis.com/oauth2/v1',
+        'client_id': '421833888173.apps.googleusercontent.com',
+        'client_secret': 'VueqKFZyz-aoL4rQFleEIT1j',
+        'redirect_uri': 'http://localhost:8080/o/login/google',
+        'scope': ('email', 'https://www.googleapis.com/auth/userinfo.profile',),
+    },
+    'facebook': {
+        'auth_endpoint': 'https://www.facebook.com/dialog/oauth',
+        'token_endpoint': 'https://graph.facebook.com/oauth/access_token',
+        'resource_endpoint': 'https://graph.facebook.com',
+        'scope': ('email',),
+        'parser': lambda data: dict(parse_qsl(data)),
+        'client_id': '152107704926343',
+        'client_secret': '80c81e4d7d5bc68ecc8cf1da0213382e',
+        'redirect_uri': 'http://localhost:8080/o/login/facebook',
+    }
+}
+
+AUTH_USER_MODEL = 'core.User'
+
+AUTHENTICATION_BACKENDS = ( 
+    'django_sanction.backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/profile'
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'

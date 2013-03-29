@@ -1,21 +1,15 @@
 # vim: ts=4 sw=4 et:
+import logging
+
 from urllib import urlencode
-from urlparse import (
-    parse_qsl, 
-    urlparse,
-    urlunparse,
-)
-from django.contrib.auth import logout as django_logout
+from urlparse import parse_qsl, urlparse, urlunparse
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
 from django.conf import settings
 from django.contrib.auth import login as django_login, authenticate
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.utils.crypto import (
-    constant_time_compare,
-)
+from django.core.exceptions import PermissionDenied 
+from django.utils.crypto import constant_time_compare
 from django.middleware import csrf
 from django.middleware.csrf import CsrfViewMiddleware
 
@@ -30,11 +24,6 @@ def login(request, provider):
     else:
         return _login(request, provider)
 
-@login_required
-def logout(request):
-    django_logout(request)
-    return redirect(getattr(settings, 'SANCTION_LOGIN_URI', '/'))
-
 def _redirect(request, provider):
     p = settings.SANCTION_PROVIDERS[provider]
     c = SanctionClient(auth_endpoint=p['auth_endpoint'],
@@ -42,8 +31,8 @@ def _redirect(request, provider):
 
     response = redirect(c.auth_uri(p['scope'] if 'scope' in p else None))
 
+    # inject the state query param
     if getattr(settings, 'SANCTION_USE_CSRF', True):
-        # inject the state query param
         CsrfViewMiddleware().process_view(request, response, [], {})
         url = list(urlparse(response['location']))
         urlp = dict(parse_qsl(url[4]))
@@ -53,23 +42,25 @@ def _redirect(request, provider):
 
     return response
 
-
 def _login(request, provider):
     if getattr(settings, 'SANCTION_USE_CSRF', True):
         if not request.GET.has_key('state'):
-            raise ValueError( # pragma: no cover
-                'SANCTION_USE_CSRF=True but "state" is not defined in GET')
+            logging.error(
+                'SANCTION_USE_CSRF=True but "state" not defined in GET')
+            raise PermissionDenied
 
         if not constant_time_compare(csrf.get_token(request), request.GET[
             'state']):
-            raise ValueError( # pragma: no cover
-                'state GET param does not match session state')
+            logging.error('state GET param does not match session state')
+            raise PermissionDenied
 
-    user = authenticate(code=request.GET['code'], provider=provider)
+    user = authenticate(code=request.GET['code'], provider_key=provider)
 
     if user is not None:
+        request.session['p'] = provider 
         django_login(request, user)
-    else:
-        raise ValueError # pragma: no cover
+    else: # pragma: no cover
+        logging.error('Unable to authenticate user')
+        raise PermissionDenied
 
     return redirect(settings.LOGIN_REDIRECT_URL)

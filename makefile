@@ -8,7 +8,6 @@ test:
 example:
 	export PYTHONPATH=$$PYTHONPATH:`pwd` && \
 	cd example && \
-	rm -f sql.db && \
 	python manage.py syncdb --noinput && \
 	python manage.py runserver 8080
 

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a href="/o/logout">logout</a>
+    <ul>
+        <li>First name: {{ first_name }}</li>
+        <li>Last name: {{ last_name }}</li>
+        <li>Email: {{ email }}</li>
+        <li>Provider: {{ provider }}</li> 
+    </ul>
+    <h2>{{ provider }} data</h2>
+    <ul>
+    {% for k, v in user_info.items %}
+        <li>{{ k }}: {{ v }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}
