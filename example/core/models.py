@@ -105,6 +105,4 @@ class Provider(models.Model):
             client_secret=provider['client_secret'])
 
         c.access_token = self.access_token
-        # expired tokens should be handled here. this could mean either
-        # settings up a method to redirect
         return c
