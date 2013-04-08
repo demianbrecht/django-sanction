@@ -10,14 +10,11 @@ def index(request):
 @login_required
 def profile(request):
     data = request.user._wrapped.__dict__
-    data.update({
-        'email': request.user.current_provider(request).email,
-        'provider': request.user.current_provider(request).name,
-    })
-    api_map = {
-        'google': '/userinfo',
-        'facebook': '/me'
-    }
     provider = request.user.current_provider(request)
-    data['user_info'] = provider.resource.request(api_map[provider.name])
+    data.update({
+        'email': provider.email,
+        'provider': provider.name,
+        'pid': provider.pid,
+    })
+
     return render_to_response('profile.html', data) 

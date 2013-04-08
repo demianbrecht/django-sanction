@@ -8,3 +8,4 @@ lib.tags
 tags
 *.stackdump
 .env
+docs/_build

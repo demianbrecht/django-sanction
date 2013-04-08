@@ -1,8 +1,12 @@
-# vim: ts=4 sw=4 et:
+# -*- coding: utf-8 -*- 
 import logging
 
-from urllib import urlencode
-from urlparse import parse_qsl, urlparse, urlunparse
+try: # pragma: no cover
+    from urllib import urlencode
+    from urlparse import parse_qsl, urlparse, urlunparse
+except ImportError: # pragma: no cover
+    from urllib.parse import urlencode, parse_qsl, urlparse, urlunparse
+
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
@@ -16,6 +20,25 @@ from django.middleware.csrf import CsrfViewMiddleware
 from sanction.client import Client as SanctionClient
 
 def login(request, provider):
+    """ Log in the current user following the OAuth 2.0 server flow
+
+    This will follow one of two paths depending on the state of the request:
+
+    **Initial entry**
+
+    Initial entry state simply means that the user has not yet visited the
+    provider to grant (or deny) authorization. In this state, a correct URL
+    will be generated (provider-specific based on settings in
+    ``SANCTION_PROVIDERS``) and the user will be redirected.
+
+    **Token exchange**
+    
+    In this state, the user has already visited the providers' authorization
+    page and has accepted the authorization request. The provider has returned
+    the user to the login page, providing an OAuth 2.0 "code". This code is
+    exchanged for an access token and the user is redirected to 
+    ``LOGIN_REDIRECT_URL`` after they have been logged in.
+    """
     if not isinstance(request.user, AnonymousUser):
         return redirect(settings.LOGIN_REDIRECT_URL)
 
@@ -29,7 +52,8 @@ def _redirect(request, provider):
     c = SanctionClient(auth_endpoint=p['auth_endpoint'],
         client_id=p['client_id'], redirect_uri=p['redirect_uri'])
 
-    response = redirect(c.auth_uri(p['scope'] if 'scope' in p else None))
+    kwargs = p.get('auth_params', {})
+    response = redirect(c.auth_uri(p['scope'] if 'scope' in p else None, **kwargs))
 
     # inject the state query param
     if getattr(settings, 'SANCTION_USE_CSRF', True):
@@ -44,7 +68,7 @@ def _redirect(request, provider):
 
 def _login(request, provider):
     if getattr(settings, 'SANCTION_USE_CSRF', True):
-        if not request.GET.has_key('state'):
+        if not 'state' in request.GET:
             logging.error(
                 'SANCTION_USE_CSRF=True but "state" not defined in GET')
             raise PermissionDenied
@@ -57,7 +81,7 @@ def _login(request, provider):
     user = authenticate(code=request.GET['code'], provider_key=provider)
 
     if user is not None:
-        request.session['p'] = provider 
+        request.session['__sp'] = provider 
         django_login(request, user)
     else: # pragma: no cover
         logging.error('Unable to authenticate user')

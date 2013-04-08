@@ -1,6 +1,9 @@
 # Django settings for example project.
 from os.path import dirname
-from urlparse import parse_qsl
+try:
+    from urlparse import parse_qsl
+except ImportError:
+    from urllib.parse import parse_qsl
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -168,6 +171,7 @@ SANCTION_PROVIDERS = {
         'client_secret': 'VueqKFZyz-aoL4rQFleEIT1j',
         'redirect_uri': 'http://localhost:8080/o/login/google',
         'scope': ('email', 'https://www.googleapis.com/auth/userinfo.profile',),
+        'auth_params': {'access_type': 'offline'}
     },
     'facebook': {
         'auth_endpoint': 'https://www.facebook.com/dialog/oauth',

@@ -1,7 +1,7 @@
 .PHONY: test example tags cloc lint
 
 test:
-	export PYTHONPATH=$$PYTHONPATH:`pwd` && python -m coverage run django_sanction/tests.py
+	export PYTHONPATH=$$PYTHONPATH:`pwd` && python -m coverage run --source django_sanction django_sanction/tests.py
 	python -m coverage report -m
 
 

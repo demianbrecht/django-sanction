@@ -1,8 +1,11 @@
-# vim: ts=4 sw=4 et:
+# -*- coding: utf-8 -*- 
 import sys
 import unittest
 from os.path import dirname
-from urlparse import urlparse, parse_qsl
+try:
+    from urlparse import urlparse, parse_qsl
+except ImportError: # pragma: no cover
+    from urllib.parse import urlparse, parse_qsl
 
 from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url

@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from time import mktime
 
 from django.conf import settings
 from django.db import models
@@ -20,10 +21,9 @@ class User(AbstractBaseUser):
     @lazy
     def providers(self):
         return dict((p.name, p) for p in Provider.objects.filter(user=self))
-
     
     def current_provider(self, request):
-        return self.providers[request.session['p']]
+        return self.providers[request.session['__sp']]
 
     @staticmethod
     def fetch_user(provider, client):
@@ -44,6 +44,7 @@ class User(AbstractBaseUser):
             'last_name': resp['family_name'],
             'access_token': client.access_token,
             'token_expires': client.token_expires,
+            'refresh_token': client.refresh_token,
         }
         return User._get(normalized)
 
@@ -57,8 +58,10 @@ class User(AbstractBaseUser):
             'first_name': resp['first_name'],
             'last_name': resp['last_name'],
             'access_token': client.access_token,
-            'token_expires': (datetime.utcnow() - datetime(
-                1970, 1, 1)).total_seconds(),
+            # fb doesn't use the RFC-defined expires_in field, but uses
+            # expires. as such, we have to set this manually
+            'token_expires': mktime((datetime.utcnow() +
+                timedelta(seconds=int(client.expires))).timetuple()),
         }
         return User._get(normalized)
 
@@ -68,7 +71,6 @@ class User(AbstractBaseUser):
             provider = Provider.objects.get(name=data['provider'],
                 pid=data['id'])
         except Provider.DoesNotExist:
-            # TODO: do something unique with username
             user = User.objects.create(username='{}_{}'.format(
                 data['provider'], data['id']),
                 first_name=data['first_name'],
@@ -82,6 +84,7 @@ class User(AbstractBaseUser):
             provider.email = data['email']
             provider.access_token = data['access_token']
             provider.token_expires = data['token_expires']
+            provider.refresh_token = data.get('refresh_token', None)
             provider.save()
 
         return provider.user
@@ -93,7 +96,9 @@ class Provider(models.Model):
     pid = models.CharField(_('provider id'), max_length=50)
     access_token = models.CharField(_('access token'), max_length=100,
         blank=True)
-    token_expires = models.FloatField(default=0)
+    refresh_token = models.CharField(_('refresh token'), max_length=100,
+        blank=True, null=True)
+    token_expires = models.FloatField(default=-1)
 
     @lazy
     def resource(self):
@@ -104,5 +109,14 @@ class Provider(models.Model):
             client_id=provider['client_id'],
             client_secret=provider['client_secret'])
 
+        c.refresh_token = self.refresh_token
         c.access_token = self.access_token
+        c.token_expires = self.token_expires
         return c
+
+    def refresh(self):
+        assert self.refresh_token is not None
+        self.resource.refresh()
+        self.access_token = self.resource.access_token
+        self.token_expires = self.resource.token_expires
+        self.save()
