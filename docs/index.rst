@@ -31,6 +31,16 @@ defining the user model is likely where you'll spend most of your time.
 Configuration
 -------------
 
+First, ``django_sanction`` must be added to your ``INSTALLED_APPS``:
+
+.. code-block:: python
+
+    INSTALLED_APPS = (
+        # ...
+        'django_sanction',
+        # ...
+    )
+
 The URLs defined by ``django_sanction`` must be added and anchored to a root
 path. In your applications' urls.py:
 
