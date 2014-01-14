@@ -170,14 +170,15 @@ SANCTION_PROVIDERS = {
         'client_id': '421833888173.apps.googleusercontent.com',
         'client_secret': 'VueqKFZyz-aoL4rQFleEIT1j',
         'redirect_uri': 'http://localhost:8080/o/login/google',
-        'scope': ('email', 'https://www.googleapis.com/auth/userinfo.profile',),
+        'scope': 'https://www.googleapis.com/auth/userinfo.email'
+            ' https://www.googleapis.com/auth/userinfo.profile',
         'auth_params': {'access_type': 'offline'}
     },
     'facebook': {
         'auth_endpoint': 'https://www.facebook.com/dialog/oauth',
         'token_endpoint': 'https://graph.facebook.com/oauth/access_token',
         'resource_endpoint': 'https://graph.facebook.com',
-        'scope': ('email',),
+        'scope': 'email',
         'parser': lambda data: dict(parse_qsl(data)),
         'client_id': '152107704926343',
         'client_secret': '80c81e4d7d5bc68ecc8cf1da0213382e',

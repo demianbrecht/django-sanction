@@ -8,7 +8,12 @@ except ImportError: # pragma: no cover
     from urllib.parse import urlparse, parse_qsl
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, include, url
+try:
+    # django < 1.6
+    from django.conf.urls.defaults import patterns, include, url
+except ImportError:
+    from django.conf.urls import patterns, include, url
+
 from django.http import HttpResponseForbidden
 from sanction.client import Client as SanctionClient
 
