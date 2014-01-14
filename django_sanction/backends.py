@@ -3,7 +3,7 @@
 """
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from sanction.client import Client as SanctionClient
+from sanction import Client as SanctionClient
 
 class AuthenticationBackend(object):
     """ Authentication backend for ``django_sanction``.
@@ -36,10 +36,10 @@ class AuthenticationBackend(object):
             resource_endpoint=provider['resource_endpoint'],
             auth_endpoint=provider['auth_endpoint'],
             client_id=provider['client_id'],
-            client_secret=provider['client_secret'],
-            redirect_uri=provider['redirect_uri'])
+            client_secret=provider['client_secret'])
 
-        c.request_token(code=code, parser=provider.get('parser', None))
+        c.request_token(code=code, parser=provider.get('parser', None),
+                        redirect_uri=provider['redirect_uri'])
 
         return model.fetch_user(provider_key, c)
 
